@@ -372,7 +372,13 @@
                             <option value="85:110k">85 : 110 kg</option>
                             <option value="5x:6x">5X & 6X</option>
                         </select>
-                        <input type="url" id="new-prod-img" placeholder="Image URL" required class="sm:col-span-2 p-2.5 rounded-lg border border-warm">
+                        
+                        <!-- Direct File Upload for Product Image -->
+                        <div class="sm:col-span-2 space-y-1">
+                            <label class="block font-semibold text-navy">Choose Product Photo from Phone/Gallery</label>
+                            <input type="file" id="new-prod-file" accept="image/*" required class="w-full text-xs p-2 bg-white rounded-lg border border-warm cursor-pointer">
+                        </div>
+
                         <button type="submit" class="sm:col-span-2 py-3 bg-navy text-sand font-bold rounded-xl uppercase">Publish Product</button>
                     </form>
                 </div>
@@ -382,16 +388,16 @@
                     <h4 class="font-bold text-xs uppercase text-navy">Update Home Category Covers</h4>
                     <div class="space-y-3 text-xs">
                         <div>
-                            <label class="block font-semibold mb-1">Pajamas Cover Image URL</label>
-                            <input type="url" id="cov-url-pajamas" class="w-full p-2.5 rounded-lg border border-warm">
+                            <label class="block font-semibold mb-1">Pajamas Cover Photo</label>
+                            <input type="file" id="cov-file-pajamas" accept="image/*" class="w-full text-xs p-2 bg-white rounded-lg border border-warm cursor-pointer">
                         </div>
                         <div>
-                            <label class="block font-semibold mb-1">Jumpsuit & Blanket Cover Image URL</label>
-                            <input type="url" id="cov-url-jumpsuit" class="w-full p-2.5 rounded-lg border border-warm">
+                            <label class="block font-semibold mb-1">Jumpsuit & Blanket Cover Photo</label>
+                            <input type="file" id="cov-file-jumpsuit" accept="image/*" class="w-full text-xs p-2 bg-white rounded-lg border border-warm cursor-pointer">
                         </div>
                         <div>
-                            <label class="block font-semibold mb-1">New Collection Cover Image URL</label>
-                            <input type="url" id="cov-url-new" class="w-full p-2.5 rounded-lg border border-warm">
+                            <label class="block font-semibold mb-1">New Collection Cover Photo</label>
+                            <input type="file" id="cov-file-new" accept="image/*" class="w-full text-xs p-2 bg-white rounded-lg border border-warm cursor-pointer">
                         </div>
                         <button type="button" onclick="saveCategoryCovers()" class="w-full py-3 bg-rosegold text-white font-bold rounded-xl uppercase">Save Covers</button>
                     </div>
@@ -943,26 +949,44 @@
             document.getElementById(`adm-tab-${tab}`).classList.remove('hidden');
         }
 
-        function saveCategoryCovers() {
-            const covP = document.getElementById('cov-url-pajamas').value;
-            const covJ = document.getElementById('cov-url-jumpsuit').value;
-            const covN = document.getElementById('cov-url-new').value;
-
-            if (covP) categoryCovers['pajamas'] = covP;
-            if (covJ) categoryCovers['jumpsuit-blanket'] = covJ;
-            if (covN) categoryCovers['new-collection'] = covN;
-
-            alert('Category Covers Updated!');
-            showHomeView();
+        // Helper Function to convert local uploaded file to base64 URL
+        function readFileAsDataURL(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+                reader.readAsDataURL(file);
+            });
         }
 
-        function handleAdminAddProduct(e) {
+        async function saveCategoryCovers() {
+            const fileP = document.getElementById('cov-file-pajamas').files[0];
+            const fileJ = document.getElementById('cov-file-jumpsuit').files[0];
+            const fileN = document.getElementById('cov-file-new').files[0];
+
+            if (fileP) categoryCovers['pajamas'] = await readFileAsDataURL(fileP);
+            if (fileJ) categoryCovers['jumpsuit-blanket'] = await readFileAsDataURL(fileJ);
+            if (fileN) categoryCovers['new-collection'] = await readFileAsDataURL(fileN);
+
+            alert('Category Cover Photos Updated Successfully!');
+            showHomeView();
+            closeAdminModal();
+        }
+
+        async function handleAdminAddProduct(e) {
             e.preventDefault();
             const title = document.getElementById('new-prod-title').value;
             const price = parseInt(document.getElementById('new-prod-price').value, 10);
             const cat = document.getElementById('new-prod-cat').value;
             const weight = document.getElementById('new-prod-weight').value;
-            const img = document.getElementById('new-prod-img').value;
+            const fileInput = document.getElementById('new-prod-file').files[0];
+
+            if (!fileInput) {
+                alert('Please select a product image!');
+                return;
+            }
+
+            const imgUrl = await readFileAsDataURL(fileInput);
 
             products.push({
                 id: 'p' + (products.length + 1),
@@ -971,7 +995,7 @@
                 category: cat,
                 weight: weight,
                 price: price,
-                img: img,
+                img: imgUrl,
                 desc: 'Exclusive new sleepwear addition.'
             });
 
