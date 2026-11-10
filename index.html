@@ -16,7 +16,7 @@
                         'navy-light': '#1E293B',
                         rosegold: '#B87860',
                         'rosegold-light': '#D4A391',
-                        sand: '#F7EFEF',       <!-- درجة رقيقة مخملية تميل للروز الفاتح الهادئ -->
+                        sand: '#F7EFEF',
                         'sand-light': '#FFFFFF',
                         warm: '#E8D4CC',
                         beige: '#F5E6E0'
@@ -406,36 +406,34 @@
         </div>
     </div>
 
-    <!-- Application Engine Script -->
-    <script>
-        // State Management
-        let currentLang = 'en';
-        let currentCategory = 'all';
-        let activeWeightFilter = 'all';
-        let cart = [];
-        let chatMessages = [
-            { sender: 'bot', text: '👋 Hello! Welcome to Diva Home. How can we help you find the perfect sleepwear today?' }
-        ];
+    <!-- Firebase SDK Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, getDocs, onSnapshot, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Load or Initialize Category Cover Images from LocalStorage
-        let categoryCovers = JSON.parse(localStorage.getItem('diva_category_covers')) || {
+        // Global Firebase Configuration & Initialization
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'diva-home-default-app';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+
+        let app, db, auth;
+        let products = [];
+        let categoryCovers = {
             'pajamas': 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=800&q=80',
             'jumpsuit-blanket': 'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&w=800&q=80',
             'new-collection': 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80'
         };
 
-        // Load or Initialize Products from LocalStorage
-        let products = JSON.parse(localStorage.getItem('diva_products')) || [];
+        // State Management
+        window.currentLang = 'en';
+        window.currentCategory = 'all';
+        window.activeWeightFilter = 'all';
+        window.cart = [];
+        window.chatMessages = [
+            { sender: 'bot', text: '👋 Hello! Welcome to Diva Home. How can we help you find the perfect sleepwear today?' }
+        ];
 
-        function saveProductsToStorage() {
-            localStorage.setItem('diva_products', JSON.stringify(products));
-        }
-
-        function saveCoversToStorage() {
-            localStorage.setItem('diva_category_covers', JSON.stringify(categoryCovers));
-        }
-
-        // Language Translation Dictionary
+        // Language Dictionary
         const i18n = {
             en: {
                 topBar: "A SOFTER KIND OF EVENING STARTS HERE",
@@ -487,14 +485,81 @@
             }
         };
 
+        // Initialize Firebase & Real-time Listeners
+        async function initFirebase() {
+            try {
+                if (Object.keys(firebaseConfig).length > 0) {
+                    app = initializeApp(firebaseConfig);
+                    db = getFirestore(app);
+                    auth = getAuth(app);
+
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                }
+            } catch (err) {
+                console.warn("Firebase offline mode / running standalone:", err);
+            }
+
+            // Realtime Sync for Products
+            if (db) {
+                try {
+                    const productsRef = collection(db, 'artifacts', appId, 'public', 'data', 'diva_products');
+                    onSnapshot(productsRef, (snapshot) => {
+                        products = [];
+                        snapshot.forEach((docSnap) => {
+                            products.push({ id: docSnap.id, ...docSnap.data() });
+                        });
+                        refreshCurrentView();
+                    }, (err) => console.error("Products sync error:", err));
+
+                    // Realtime Sync for Category Covers
+                    const coversRef = collection(db, 'artifacts', appId, 'public', 'data', 'diva_covers');
+                    onSnapshot(coversRef, (snapshot) => {
+                        snapshot.forEach((docSnap) => {
+                            const data = docSnap.data();
+                            if (data && data.covers) {
+                                categoryCovers = data.covers;
+                            }
+                        });
+                        refreshCurrentView();
+                    }, (err) => console.error("Covers sync error:", err));
+                } catch (e) {
+                    loadLocalStorageFallback();
+                }
+            } else {
+                loadLocalStorageFallback();
+            }
+
+            showHomeView();
+            updateCartUI();
+        }
+
+        function loadLocalStorageFallback() {
+            products = JSON.parse(localStorage.getItem('diva_products')) || [];
+            const savedCovers = JSON.parse(localStorage.getItem('diva_category_covers'));
+            if (savedCovers) categoryCovers = savedCovers;
+            refreshCurrentView();
+        }
+
+        function refreshCurrentView() {
+            if (window.currentCategory === 'all') {
+                showHomeView();
+            } else {
+                renderProductsGrid();
+            }
+        }
+
         // Render Home View
-        function showHomeView() {
-            currentCategory = 'all';
-            activeWeightFilter = 'all';
+        window.showHomeView = function() {
+            window.currentCategory = 'all';
+            window.activeWeightFilter = 'all';
             history.pushState({view: 'home'}, '', '#home');
-            const app = document.getElementById('app-view');
+            const appContainer = document.getElementById('app-view');
             
-            app.innerHTML = `
+            appContainer.innerHTML = `
                 <!-- Logo Emblem Banner -->
                 <section class="py-10 px-4 text-center bg-beige border-b border-warm/40">
                     <div class="max-w-md mx-auto flex flex-col items-center">
@@ -522,8 +587,8 @@
                 <!-- Intro Slogan Section -->
                 <section class="py-12 px-4 text-center bg-sand">
                     <div class="max-w-2xl mx-auto space-y-3">
-                        <h2 class="font-serif text-xl sm:text-2xl font-bold text-navy leading-snug">${i18n[currentLang].heroHeadline}</h2>
-                        <p class="text-xs sm:text-sm text-navy/70 leading-relaxed">${i18n[currentLang].heroSubtext}</p>
+                        <h2 class="font-serif text-xl sm:text-2xl font-bold text-navy leading-snug">${i18n[window.currentLang].heroHeadline}</h2>
+                        <p class="text-xs sm:text-sm text-navy/70 leading-relaxed">${i18n[window.currentLang].heroSubtext}</p>
                     </div>
                 </section>
 
@@ -538,7 +603,7 @@
                             </div>
                             <div class="p-6 flex-grow flex flex-col justify-between border-t border-warm/20">
                                 <h3 class="font-serif text-xl font-bold text-navy mb-2">Pajamas</h3>
-                                <p class="text-xs text-navy/70 leading-relaxed mb-4">${i18n[currentLang].pajamaDesc}</p>
+                                <p class="text-xs text-navy/70 leading-relaxed mb-4">${i18n[window.currentLang].pajamaDesc}</p>
                                 <span class="text-xs font-bold text-rosegold uppercase tracking-widest group-hover:underline">Explore Pajamas &rarr;</span>
                             </div>
                         </div>
@@ -550,7 +615,7 @@
                             </div>
                             <div class="p-6 flex-grow flex flex-col justify-between border-t border-warm/20">
                                 <h3 class="font-serif text-xl font-bold text-navy mb-2">Jumpsuit & Blanket</h3>
-                                <p class="text-xs text-navy/70 leading-relaxed mb-4">${i18n[currentLang].jumpsuitDesc}</p>
+                                <p class="text-xs text-navy/70 leading-relaxed mb-4">${i18n[window.currentLang].jumpsuitDesc}</p>
                                 <span class="text-xs font-bold text-rosegold uppercase tracking-widest group-hover:underline">Explore Jumpsuits &rarr;</span>
                             </div>
                         </div>
@@ -562,7 +627,7 @@
                             </div>
                             <div class="p-6 flex-grow flex flex-col justify-between border-t border-warm/20">
                                 <h3 class="font-serif text-xl font-bold text-navy mb-2">New Collection</h3>
-                                <p class="text-xs text-navy/70 leading-relaxed mb-4">${i18n[currentLang].newDesc}</p>
+                                <p class="text-xs text-navy/70 leading-relaxed mb-4">${i18n[window.currentLang].newDesc}</p>
                                 <span class="text-xs font-bold text-rosegold uppercase tracking-widest group-hover:underline">Shop New Collection &rarr;</span>
                             </div>
                         </div>
@@ -573,70 +638,67 @@
                 <!-- THE DIVA HOME FEELING SECTION -->
                 <section class="bg-beige py-16 px-4 border-t border-b border-warm/50">
                     <div class="max-w-5xl mx-auto text-center space-y-4">
-                        <h2 class="font-serif text-2xl sm:text-3xl font-bold tracking-[0.2em] text-navy uppercase">${i18n[currentLang].feelingTitle}</h2>
-                        <p class="text-xs sm:text-sm text-navy/70 max-w-2xl mx-auto leading-relaxed">${i18n[currentLang].feelingSub}</p>
+                        <h2 class="font-serif text-2xl sm:text-3xl font-bold tracking-[0.2em] text-navy uppercase">${i18n[window.currentLang].feelingTitle}</h2>
+                        <p class="text-xs sm:text-sm text-navy/70 max-w-2xl mx-auto leading-relaxed">${i18n[window.currentLang].feelingSub}</p>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 text-left rtl:text-right">
                             <div class="bg-sand-light p-6 rounded-2xl border border-warm/40 shadow-xs">
-                                <span class="font-serif text-rosegold text-xl font-bold block mb-2">${i18n[currentLang].step1Title}</span>
-                                <p class="text-xs text-navy/70 leading-relaxed">${i18n[currentLang].step1Desc}</p>
+                                <span class="font-serif text-rosegold text-xl font-bold block mb-2">${i18n[window.currentLang].step1Title}</span>
+                                <p class="text-xs text-navy/70 leading-relaxed">${i18n[window.currentLang].step1Desc}</p>
                             </div>
                             <div class="bg-sand-light p-6 rounded-2xl border border-warm/40 shadow-xs">
-                                <span class="font-serif text-rosegold text-xl font-bold block mb-2">${i18n[currentLang].step2Title}</span>
-                                <p class="text-xs text-navy/70 leading-relaxed">${i18n[currentLang].step2Desc}</p>
+                                <span class="font-serif text-rosegold text-xl font-bold block mb-2">${i18n[window.currentLang].step2Title}</span>
+                                <p class="text-xs text-navy/70 leading-relaxed">${i18n[window.currentLang].step2Desc}</p>
                             </div>
                             <div class="bg-sand-light p-6 rounded-2xl border border-warm/40 shadow-xs">
-                                <span class="font-serif text-rosegold text-xl font-bold block mb-2">${i18n[currentLang].step3Title}</span>
-                                <p class="text-xs text-navy/70 leading-relaxed">${i18n[currentLang].step3Desc}</p>
+                                <span class="font-serif text-rosegold text-xl font-bold block mb-2">${i18n[window.currentLang].step3Title}</span>
+                                <p class="text-xs text-navy/70 leading-relaxed">${i18n[window.currentLang].step3Desc}</p>
                             </div>
                         </div>
                     </div>
                 </section>
             `;
-        }
+        };
 
-        // Filter Category View
-        function filterCategory(cat) {
-            currentCategory = cat;
-            activeWeightFilter = 'all';
+        window.filterCategory = function(cat) {
+            window.currentCategory = cat;
+            window.activeWeightFilter = 'all';
             history.pushState({view: 'category', cat: cat}, '', `#${cat}`);
             renderProductsGrid();
-        }
+        };
 
-        // Filter Pajamas Weight Subcategory
-        function setPajamaWeightFilter(weight) {
-            activeWeightFilter = weight;
+        window.setPajamaWeightFilter = function(weight) {
+            window.activeWeightFilter = weight;
             renderProductsGrid();
-        }
+        };
 
-        // Render Products Grid
         function renderProductsGrid() {
-            const app = document.getElementById('app-view');
+            const appContainer = document.getElementById('app-view');
 
-            let filtered = products.filter(p => currentCategory === 'all' || p.category === currentCategory);
-            if (currentCategory === 'pajamas' && activeWeightFilter !== 'all') {
-                filtered = filtered.filter(p => p.weight === activeWeightFilter);
+            let filtered = products.filter(p => window.currentCategory === 'all' || p.category === window.currentCategory);
+            if (window.currentCategory === 'pajamas' && window.activeWeightFilter !== 'all') {
+                filtered = filtered.filter(p => p.weight === window.activeWeightFilter);
             }
 
             let categoryTitle = 'All Collections';
-            if (currentCategory === 'pajamas') categoryTitle = 'Pajamas Collection';
-            if (currentCategory === 'jumpsuit-blanket') categoryTitle = 'Jumpsuit & Blanket';
-            if (currentCategory === 'new-collection') categoryTitle = 'New Collection';
+            if (window.currentCategory === 'pajamas') categoryTitle = 'Pajamas Collection';
+            if (window.currentCategory === 'jumpsuit-blanket') categoryTitle = 'Jumpsuit & Blanket';
+            if (window.currentCategory === 'new-collection') categoryTitle = 'New Collection';
 
             let weightBannersHtml = '';
-            if (currentCategory === 'pajamas') {
+            if (window.currentCategory === 'pajamas') {
                 weightBannersHtml = `
                     <div class="flex flex-wrap justify-center gap-3 mb-8">
-                        <button type="button" onclick="setPajamaWeightFilter('all')" class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${activeWeightFilter === 'all' ? 'bg-navy text-white shadow-md' : 'bg-sand-light text-navy border border-warm/60 hover:border-rosegold'}">
+                        <button type="button" onclick="setPajamaWeightFilter('all')" class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${window.activeWeightFilter === 'all' ? 'bg-navy text-white shadow-md' : 'bg-sand-light text-navy border border-warm/60 hover:border-rosegold'}">
                             All Sizes
                         </button>
-                        <button type="button" onclick="setPajamaWeightFilter('65:85k')" class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${activeWeightFilter === '65:85k' ? 'bg-rosegold text-white shadow-md' : 'bg-sand-light text-navy border border-warm/60 hover:border-rosegold'}">
+                        <button type="button" onclick="setPajamaWeightFilter('65:85k')" class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${window.activeWeightFilter === '65:85k' ? 'bg-rosegold text-white shadow-md' : 'bg-sand-light text-navy border border-warm/60 hover:border-rosegold'}">
                             65 : 85 kg
                         </button>
-                        <button type="button" onclick="setPajamaWeightFilter('85:110k')" class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${activeWeightFilter === '85:110k' ? 'bg-rosegold text-white shadow-md' : 'bg-sand-light text-navy border border-warm/60 hover:border-rosegold'}">
+                        <button type="button" onclick="setPajamaWeightFilter('85:110k')" class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${window.activeWeightFilter === '85:110k' ? 'bg-rosegold text-white shadow-md' : 'bg-sand-light text-navy border border-warm/60 hover:border-rosegold'}">
                             85 : 110 kg
                         </button>
-                        <button type="button" onclick="setPajamaWeightFilter('5x:6x')" class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${activeWeightFilter === '5x:6x' ? 'bg-rosegold text-white shadow-md' : 'bg-sand-light text-navy border border-warm/60 hover:border-rosegold'}">
+                        <button type="button" onclick="setPajamaWeightFilter('5x:6x')" class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${window.activeWeightFilter === '5x:6x' ? 'bg-rosegold text-white shadow-md' : 'bg-sand-light text-navy border border-warm/60 hover:border-rosegold'}">
                             5X & 6X
                         </button>
                     </div>
@@ -651,20 +713,20 @@
                     <div class="p-4 flex-grow flex flex-col justify-between space-y-3">
                         <div>
                             <span class="text-[10px] uppercase font-bold text-rosegold tracking-wider">${item.category}</span>
-                            <h3 class="font-bold text-sm text-navy mt-1">${currentLang === 'ar' ? item.titleAr : item.title}</h3>
+                            <h3 class="font-bold text-sm text-navy mt-1">${window.currentLang === 'ar' ? item.titleAr : item.title}</h3>
                             <p class="text-[11px] text-navy/60 mt-1 line-clamp-2">${item.desc}</p>
                         </div>
                         <div class="flex items-center justify-between pt-2 border-t border-warm/30">
                             <span class="font-bold text-sm text-navy">${item.price} EGP</span>
                             <button type="button" onclick="addToCart('${item.id}')" class="bg-navy hover:bg-rosegold text-sand px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer">
-                                ${i18n[currentLang].addToBag}
+                                ${i18n[window.currentLang].addToBag}
                             </button>
                         </div>
                     </div>
                 </div>
             `).join('');
 
-            app.innerHTML = `
+            appContainer.innerHTML = `
                 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="font-serif text-xl sm:text-2xl font-bold text-navy uppercase">${categoryTitle}</h2>
@@ -679,29 +741,28 @@
             `;
         }
 
-        // Handle Browser Back/Forward buttons (Swipe back in iOS & Android native back)
         window.addEventListener('popstate', (event) => {
             if (event.state && event.state.view === 'category') {
-                currentCategory = event.state.cat;
+                window.currentCategory = event.state.cat;
                 renderProductsGrid();
             } else {
                 showHomeView();
             }
         });
 
-        // Cart Drawer Operations
-        function addToCart(id) {
+        // Cart Operations
+        window.addToCart = function(id) {
             const prod = products.find(p => p.id === id);
             if (!prod) return;
-            const existing = cart.find(c => c.id === id);
+            const existing = window.cart.find(c => c.id === id);
             if (existing) {
                 existing.qty++;
             } else {
-                cart.push({ ...prod, qty: 1 });
+                window.cart.push({ ...prod, qty: 1 });
             }
             updateCartUI();
             showCartAddedToast();
-        }
+        };
 
         function showCartAddedToast() {
             let toast = document.getElementById('cart-toast-notification');
@@ -711,7 +772,7 @@
                 toast.className = 'fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-navy text-sand px-5 py-3 rounded-2xl shadow-2xl z-50 flex items-center gap-3 text-xs font-semibold border border-warm/40 animate-bounce';
                 document.body.appendChild(toast);
             }
-            const totalCount = cart.reduce((sum, i) => sum + i.qty, 0);
+            const totalCount = window.cart.reduce((sum, i) => sum + i.qty, 0);
             toast.innerHTML = `
                 <span>🛍️ Added to Bag! (${totalCount} items)</span>
                 <button type="button" onclick="openCartDrawer()" class="bg-rosegold text-white px-3 py-1 rounded-lg text-[11px] font-bold">View Bag</button>
@@ -722,8 +783,8 @@
             }, 3500);
         }
 
-        function updateCartUI() {
-            const totalItemsCount = cart.reduce((sum, i) => sum + i.qty, 0);
+        window.updateCartUI = function() {
+            const totalItemsCount = window.cart.reduce((sum, i) => sum + i.qty, 0);
             const badge = document.getElementById('cart-badge');
             badge.innerText = totalItemsCount;
             badge.style.opacity = totalItemsCount > 0 ? '1' : '0';
@@ -735,10 +796,10 @@
             const discValElem = document.getElementById('cart-discount-val');
 
             let grossSubtotal = 0;
-            if (cart.length === 0) {
+            if (window.cart.length === 0) {
                 container.innerHTML = '<p class="text-center text-xs text-navy/60 py-8">Your bag is currently empty.</p>';
             } else {
-                container.innerHTML = cart.map(item => {
+                container.innerHTML = window.cart.map(item => {
                     const itemTotal = item.price * item.qty;
                     grossSubtotal += itemTotal;
                     return `
@@ -746,7 +807,7 @@
                             <div class="flex items-center gap-3">
                                 <img src="${item.img}" class="w-12 h-12 rounded-lg object-contain bg-sand">
                                 <div>
-                                    <h5 class="font-bold text-xs text-navy">${currentLang === 'ar' ? item.titleAr : item.title}</h5>
+                                    <h5 class="font-bold text-xs text-navy">${window.currentLang === 'ar' ? item.titleAr : item.title}</h5>
                                     <span class="text-[11px] text-rosegold font-bold">${item.price} EGP x ${item.qty}</span>
                                 </div>
                             </div>
@@ -773,51 +834,50 @@
             const netSubtotal = grossSubtotal - discountAmount;
             grossSubtotalElem.innerText = `${grossSubtotal} EGP`;
             netSubtotalElem.innerText = `${netSubtotal} EGP`;
-        }
+        };
 
-        function changeQty(id, delta) {
-            const item = cart.find(c => c.id === id);
+        window.changeQty = function(id, delta) {
+            const item = window.cart.find(c => c.id === id);
             if (!item) return;
             item.qty += delta;
             if (item.qty <= 0) {
-                cart = cart.filter(c => c.id !== id);
+                window.cart = window.cart.filter(c => c.id !== id);
             }
             updateCartUI();
-        }
+        };
 
-        function removeFromCart(id) {
-            cart = cart.filter(c => c.id !== id);
+        window.removeFromCart = function(id) {
+            window.cart = window.cart.filter(c => c.id !== id);
             updateCartUI();
-        }
+        };
 
-        function openCartDrawer() {
+        window.openCartDrawer = function() {
             document.getElementById('cart-drawer-backdrop').classList.remove('hidden');
             document.getElementById('cart-drawer').classList.remove('translate-x-full');
-        }
+        };
 
-        function closeCartDrawer() {
+        window.closeCartDrawer = function() {
             document.getElementById('cart-drawer-backdrop').classList.add('hidden');
             document.getElementById('cart-drawer').classList.add('translate-x-full');
-        }
+        };
 
-        // Checkout Modal & Calculation
-        function openCheckoutModal() {
-            if (cart.length === 0) {
+        window.openCheckoutModal = function() {
+            if (window.cart.length === 0) {
                 alert('Your bag is empty!');
                 return;
             }
             closeCartDrawer();
             updateCheckoutTotals();
             document.getElementById('checkout-modal').classList.remove('hidden');
-        }
+        };
 
-        function closeCheckoutModal() {
+        window.closeCheckoutModal = function() {
             document.getElementById('checkout-modal').classList.add('hidden');
-        }
+        };
 
-        function updateCheckoutTotals() {
-            const totalItemsCount = cart.reduce((sum, item) => sum + item.qty, 0);
-            const grossSubtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        window.updateCheckoutTotals = function() {
+            const totalItemsCount = window.cart.reduce((sum, item) => sum + item.qty, 0);
+            const grossSubtotal = window.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             
             let discountAmount = 0;
             const coRowDisc = document.getElementById('co-row-discount');
@@ -841,41 +901,40 @@
             document.getElementById('co-subtotal').innerText = `${grossSubtotal} EGP`;
             document.getElementById('co-shipping').innerText = `${shippingFee} EGP`;
             document.getElementById('co-total').innerText = `${grandTotal} EGP`;
-        }
+        };
 
-        function handlePlaceOrder(e) {
+        window.handlePlaceOrder = function(e) {
             e.preventDefault();
             alert('🎉 Thank you for your order! Diva Home will contact you via WhatsApp/Phone for confirmation.');
-            cart = [];
+            window.cart = [];
             updateCartUI();
             closeCheckoutModal();
-        }
+        };
 
-        // Live Chat Functions
-        function toggleChatWindow() {
+        window.toggleChatWindow = function() {
             const win = document.getElementById('chat-window');
             win.classList.toggle('hidden');
-        }
+        };
 
-        function handleCustomerSendMessage(e) {
+        window.handleCustomerSendMessage = function(e) {
             e.preventDefault();
             const input = document.getElementById('chat-input');
             const msg = input.value.trim();
             if (!msg) return;
 
-            chatMessages.push({ sender: 'user', text: msg });
+            window.chatMessages.push({ sender: 'user', text: msg });
             input.value = '';
             renderChat();
 
             setTimeout(() => {
-                chatMessages.push({ sender: 'bot', text: 'Thank you for reaching out! Our support team will answer your query shortly.' });
+                window.chatMessages.push({ sender: 'bot', text: 'Thank you for reaching out! Our support team will answer your query shortly.' });
                 renderChat();
             }, 1000);
-        }
+        };
 
         function renderChat() {
             const container = document.getElementById('chat-messages');
-            container.innerHTML = chatMessages.map(m => `
+            container.innerHTML = window.chatMessages.map(m => `
                 <div class="${m.sender === 'user' ? 'bg-navy text-sand self-end ml-auto' : 'bg-beige text-navy border border-warm/30 self-start'} p-3 rounded-xl max-w-[85%] text-xs">
                     ${m.text}
                 </div>
@@ -883,16 +942,15 @@
             container.scrollTop = container.scrollHeight;
         }
 
-        // Admin Modal Functions
-        function openAdminModal() {
+        window.openAdminModal = function() {
             document.getElementById('admin-modal').classList.remove('hidden');
-        }
+        };
 
-        function closeAdminModal() {
+        window.closeAdminModal = function() {
             document.getElementById('admin-modal').classList.add('hidden');
-        }
+        };
 
-        function verifyAdminLogin() {
+        window.verifyAdminLogin = function() {
             const email = document.getElementById('admin-email-input').value.trim();
             const pass = document.getElementById('admin-pass-input').value.trim();
 
@@ -902,16 +960,15 @@
             } else {
                 alert('Invalid Email or Password!');
             }
-        }
+        };
 
-        function switchAdminTab(tab) {
+        window.switchAdminTab = function(tab) {
             document.getElementById('adm-tab-chat').classList.add('hidden');
             document.getElementById('adm-tab-products').classList.add('hidden');
             document.getElementById('adm-tab-covers').classList.add('hidden');
             document.getElementById(`adm-tab-${tab}`).classList.remove('hidden');
-        }
+        };
 
-        // Helper Function to convert local uploaded file to base64 URL
         function readFileAsDataURL(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -921,7 +978,7 @@
             });
         }
 
-        async function saveCategoryCovers() {
+        window.saveCategoryCovers = async function() {
             const fileP = document.getElementById('cov-file-pajamas').files[0];
             const fileJ = document.getElementById('cov-file-jumpsuit').files[0];
             const fileN = document.getElementById('cov-file-new').files[0];
@@ -930,13 +987,23 @@
             if (fileJ) categoryCovers['jumpsuit-blanket'] = await readFileAsDataURL(fileJ);
             if (fileN) categoryCovers['new-collection'] = await readFileAsDataURL(fileN);
 
-            saveCoversToStorage();
-            alert('Category Cover Photos Updated Successfully!');
+            if (db) {
+                try {
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'diva_covers', 'main_covers'), {
+                        covers: categoryCovers
+                    });
+                } catch (e) {
+                    console.error("Cloud save covers error:", e);
+                }
+            }
+            localStorage.setItem('diva_category_covers', JSON.stringify(categoryCovers));
+
+            alert('Category Cover Photos Updated & Synced to Cloud Successfully!');
             showHomeView();
             closeAdminModal();
-        }
+        };
 
-        async function handleAdminAddProduct(e) {
+        window.handleAdminAddProduct = async function(e) {
             e.preventDefault();
             const title = document.getElementById('new-prod-title').value;
             const price = parseInt(document.getElementById('new-prod-price').value, 10);
@@ -950,68 +1017,70 @@
             }
 
             const imgUrl = await readFileAsDataURL(fileInput);
-
-            products.push({
-                id: 'p' + Date.now(),
+            const newProd = {
                 title: title,
                 titleAr: title,
                 category: cat,
                 weight: weight,
                 price: price,
                 img: imgUrl,
-                desc: 'Exclusive new sleepwear addition.'
-            });
+                desc: 'Exclusive new sleepwear addition.',
+                createdAt: Date.now()
+            };
 
-            saveProductsToStorage();
-            alert('Product Published Successfully & Saved Forever!');
+            if (db) {
+                try {
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'diva_products'), newProd);
+                } catch (e) {
+                    console.error("Cloud product add error:", e);
+                }
+            }
+
+            products.push(newProd);
+            localStorage.setItem('diva_products', JSON.stringify(products));
+
+            alert('Product Published & Synced to Cloud for All Visitors!');
             document.getElementById('new-prod-title').value = '';
             document.getElementById('new-prod-price').value = '';
             document.getElementById('new-prod-file').value = '';
             filterCategory(cat);
             closeAdminModal();
-        }
+        };
 
-        // Mobile Menu Drawer Toggle
-        function toggleMobileMenu() {
+        window.toggleMobileMenu = function() {
             const mob = document.getElementById('mobile-menu');
             mob.classList.toggle('hidden');
-        }
+        };
 
-        // Language Switcher
-        function toggleLanguage() {
-            currentLang = currentLang === 'en' ? 'ar' : 'en';
-            document.getElementById('lang-btn-text').innerText = currentLang === 'en' ? 'عربي' : 'English';
-            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+        window.toggleLanguage = function() {
+            window.currentLang = window.currentLang === 'en' ? 'ar' : 'en';
+            document.getElementById('lang-btn-text').innerText = window.currentLang === 'en' ? 'عربي' : 'English';
+            document.documentElement.dir = window.currentLang === 'ar' ? 'rtl' : 'ltr';
 
-            // Update UI Labels
-            document.getElementById('txt-top-bar').innerText = i18n[currentLang].topBar;
-            document.getElementById('nav-home').innerText = i18n[currentLang].home;
-            document.getElementById('cat-pajamas').innerText = i18n[currentLang].pajamas;
-            document.getElementById('cat-jumpsuit').innerText = i18n[currentLang].jumpsuit;
-            document.getElementById('cat-new').innerText = i18n[currentLang].newColl;
+            document.getElementById('txt-top-bar').innerText = i18n[window.currentLang].topBar;
+            document.getElementById('nav-home').innerText = i18n[window.currentLang].home;
+            document.getElementById('cat-pajamas').innerText = i18n[window.currentLang].pajamas;
+            document.getElementById('cat-jumpsuit').innerText = i18n[window.currentLang].jumpsuit;
+            document.getElementById('cat-new').innerText = i18n[window.currentLang].newColl;
 
-            // Mobile Drawer Translations
-            document.getElementById('mob-home').innerText = i18n[currentLang].home;
-            document.getElementById('mob-collections').innerText = i18n[currentLang].collections;
-            document.getElementById('mob-pajamas').innerText = i18n[currentLang].pajamas;
-            document.getElementById('mob-jumpsuit').innerText = i18n[currentLang].jumpsuit;
-            document.getElementById('mob-new').innerText = i18n[currentLang].newColl;
+            document.getElementById('mob-home').innerText = i18n[window.currentLang].home;
+            document.getElementById('mob-collections').innerText = i18n[window.currentLang].collections;
+            document.getElementById('mob-pajamas').innerText = i18n[window.currentLang].pajamas;
+            document.getElementById('mob-jumpsuit').innerText = i18n[window.currentLang].jumpsuit;
+            document.getElementById('mob-new').innerText = i18n[window.currentLang].newColl;
 
-            // Offer Banner Translations
-            document.getElementById('lbl-offer-headline').innerText = i18n[currentLang].offerHeadline;
-            document.getElementById('txt-offer-desc').innerText = i18n[currentLang].offerDesc;
+            document.getElementById('lbl-offer-headline').innerText = i18n[window.currentLang].offerHeadline;
+            document.getElementById('txt-offer-desc').innerText = i18n[window.currentLang].offerDesc;
 
-            if (currentCategory === 'all') {
+            if (window.currentCategory === 'all') {
                 showHomeView();
             } else {
                 renderProductsGrid();
             }
-        }
+        };
 
-        // Window Init
         window.onload = function() {
-            showHomeView();
-            updateCartUI();
+            initFirebase();
         };
     </script>
 </body>
