@@ -417,56 +417,23 @@
             { sender: 'bot', text: '👋 Hello! Welcome to Diva Home. How can we help you find the perfect sleepwear today?' }
         ];
 
-        // Default Category Cover Images
-        let categoryCovers = {
+        // Load or Initialize Category Cover Images from LocalStorage
+        let categoryCovers = JSON.parse(localStorage.getItem('diva_category_covers')) || {
             'pajamas': 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=800&q=80',
             'jumpsuit-blanket': 'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&w=800&q=80',
             'new-collection': 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80'
         };
 
-        // Products Database
-        let products = [
-            {
-                id: 'p1',
-                title: 'Silk Touch Satin Pajama Set',
-                titleAr: 'طقم بيجامة مريح وأنيق',
-                category: 'pajamas',
-                weight: '65:85k',
-                price: 750,
-                img: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=800&q=80',
-                desc: 'Premium soft sleepwear set for ultra comfort.'
-            },
-            {
-                id: 'p2',
-                title: 'Cozy Oversized Wearable Fleece Blanket',
-                titleAr: 'بطانية مفروشة دافئة جداً مريحة',
-                category: 'jumpsuit-blanket',
-                weight: '85:110k',
-                price: 980,
-                img: 'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&w=800&q=80',
-                desc: 'Soft hooded wearable blanket to keep you warm through cold evenings.'
-            },
-            {
-                id: 'p3',
-                title: 'Plush Winter Jumpsuit Hoodie',
-                titleAr: 'جامبسوت شتوي مبطن غطاء رأس',
-                category: 'jumpsuit-blanket',
-                weight: '65:85k',
-                price: 1100,
-                img: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80',
-                desc: 'Ultra cozy character winter jumpsuit with soft plush fabric.'
-            },
-            {
-                id: 'p4',
-                title: 'Royal Velvet Nightwear 5X Edition',
-                titleAr: 'طقم نوم قطيفة ملكي مقاسات خاصة',
-                category: 'pajamas',
-                weight: '5x:6x',
-                price: 1250,
-                img: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80',
-                desc: 'Tailored luxury velvet pajamas specially created for plus size elegance.'
-            }
-        ];
+        // Load or Initialize Products from LocalStorage
+        let products = JSON.parse(localStorage.getItem('diva_products')) || [];
+
+        function saveProductsToStorage() {
+            localStorage.setItem('diva_products', JSON.stringify(products));
+        }
+
+        function saveCoversToStorage() {
+            localStorage.setItem('diva_category_covers', JSON.stringify(categoryCovers));
+        }
 
         // Language Translation Dictionary
         const i18n = {
@@ -524,6 +491,7 @@
         function showHomeView() {
             currentCategory = 'all';
             activeWeightFilter = 'all';
+            history.pushState({view: 'home'}, '', '#home');
             const app = document.getElementById('app-view');
             
             app.innerHTML = `
@@ -532,28 +500,16 @@
                     <div class="max-w-md mx-auto flex flex-col items-center">
                         <div class="w-24 h-24 sm:w-28 sm:h-28 relative flex items-center justify-center mb-3">
                             <svg class="w-full h-full text-rosegold drop-shadow-sm" viewBox="0 0 200 200" fill="none" stroke="currentColor">
-                                <!-- Outer Decorative Ring & Stars -->
                                 <circle cx="100" cy="100" r="85" stroke="#C58F78" stroke-width="1.5" stroke-dasharray="4 4" />
                                 <circle cx="100" cy="100" r="76" stroke="#1A2332" stroke-width="1" />
-                                
-                                <!-- Elegant Shopping Bags Emblem (Shopping Tote & Gift Bag) -->
                                 <g transform="translate(42, 40) scale(1.15)" stroke-linecap="round" stroke-linejoin="round" fill="none">
-                                    <!-- Back/Secondary Shopping Bag -->
                                     <path d="M 52,28 L 84,28 L 90,88 L 46,88 Z" fill="#E2D5C8" stroke="#1A2332" stroke-width="2" />
-                                    <!-- Back Bag Handles -->
                                     <path d="M 62,28 C 62,18 74,18 74,28" stroke="#B87860" stroke-width="2.5" />
-
-                                    <!-- Front/Primary Elegant Shopping Bag -->
                                     <path d="M 18,38 L 62,38 L 68,96 L 12,96 Z" fill="#FAF7F2" stroke="#B87860" stroke-width="2.5" />
-                                    <!-- Front Bag Handles -->
                                     <path d="M 32,38 C 32,22 48,22 48,38" stroke="#1A2332" stroke-width="3" />
-                                    
-                                    <!-- Subtle Ribbon/Bow Tag on Front Bag -->
                                     <path d="M 40,48 L 40,68" stroke="#B87860" stroke-width="1.5" stroke-dasharray="2 2" />
                                     <circle cx="40" cy="68" r="3" fill="#B87860" stroke="none" />
                                 </g>
-                                
-                                <!-- Sparkle Stars -->
                                 <path d="M30,50 L33,56 L39,59 L33,62 L30,68 L27,62 L21,59 L27,56 Z" fill="#C58F78" stroke="none"/>
                                 <path d="M170,140 L172,144 L176,146 L172,148 L170,152 L168,148 L164,146 L168,144 Z" fill="#C58F78" stroke="none"/>
                             </svg>
@@ -571,18 +527,17 @@
                     </div>
                 </section>
 
-                <!-- 3 Category Cards -->
+                <!-- 3 Category Cards (Fluid Image Container - No Cropping) -->
                 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                         
                         <!-- Pajamas Card -->
                         <div onclick="filterCategory('pajamas')" class="group cursor-pointer bg-sand-light rounded-2xl overflow-hidden shadow-xs hover:shadow-xl transition-all border border-warm/50 flex flex-col">
-                            <div class="h-80 sm:h-96 overflow-hidden relative">
-                                <img src="${categoryCovers['pajamas']}" alt="Pajamas" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                                <div class="absolute inset-0 bg-gradient-to-t from-navy/75 via-transparent to-transparent"></div>
-                                <span class="absolute bottom-4 left-4 right-4 text-white font-serif text-2xl font-bold">Pajamas</span>
+                            <div class="w-full bg-sand/80 flex items-center justify-center p-4 min-h-[260px]">
+                                <img src="${categoryCovers['pajamas']}" alt="Pajamas" class="w-full h-auto max-h-[380px] object-contain rounded-lg group-hover:scale-102 transition-transform duration-300">
                             </div>
-                            <div class="p-6 flex-grow flex flex-col justify-between">
+                            <div class="p-6 flex-grow flex flex-col justify-between border-t border-warm/20">
+                                <h3 class="font-serif text-xl font-bold text-navy mb-2">Pajamas</h3>
                                 <p class="text-xs text-navy/70 leading-relaxed mb-4">${i18n[currentLang].pajamaDesc}</p>
                                 <span class="text-xs font-bold text-rosegold uppercase tracking-widest group-hover:underline">Explore Pajamas &rarr;</span>
                             </div>
@@ -590,12 +545,11 @@
 
                         <!-- Jumpsuit Card -->
                         <div onclick="filterCategory('jumpsuit-blanket')" class="group cursor-pointer bg-sand-light rounded-2xl overflow-hidden shadow-xs hover:shadow-xl transition-all border border-warm/50 flex flex-col">
-                            <div class="h-80 sm:h-96 overflow-hidden relative">
-                                <img src="${categoryCovers['jumpsuit-blanket']}" alt="Jumpsuit & Blanket" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                                <div class="absolute inset-0 bg-gradient-to-t from-navy/75 via-transparent to-transparent"></div>
-                                <span class="absolute bottom-4 left-4 right-4 text-white font-serif text-2xl font-bold">Jumpsuit & Blanket</span>
+                            <div class="w-full bg-sand/80 flex items-center justify-center p-4 min-h-[260px]">
+                                <img src="${categoryCovers['jumpsuit-blanket']}" alt="Jumpsuit & Blanket" class="w-full h-auto max-h-[380px] object-contain rounded-lg group-hover:scale-102 transition-transform duration-300">
                             </div>
-                            <div class="p-6 flex-grow flex flex-col justify-between">
+                            <div class="p-6 flex-grow flex flex-col justify-between border-t border-warm/20">
+                                <h3 class="font-serif text-xl font-bold text-navy mb-2">Jumpsuit & Blanket</h3>
                                 <p class="text-xs text-navy/70 leading-relaxed mb-4">${i18n[currentLang].jumpsuitDesc}</p>
                                 <span class="text-xs font-bold text-rosegold uppercase tracking-widest group-hover:underline">Explore Jumpsuits &rarr;</span>
                             </div>
@@ -603,12 +557,11 @@
 
                         <!-- New Collection Card -->
                         <div onclick="filterCategory('new-collection')" class="group cursor-pointer bg-sand-light rounded-2xl overflow-hidden shadow-xs hover:shadow-xl transition-all border border-warm/50 flex flex-col">
-                            <div class="h-80 sm:h-96 overflow-hidden relative">
-                                <img src="${categoryCovers['new-collection']}" alt="New Collection" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                                <div class="absolute inset-0 bg-gradient-to-t from-navy/75 via-transparent to-transparent"></div>
-                                <span class="absolute bottom-4 left-4 right-4 text-white font-serif text-2xl font-bold">New Collection</span>
+                            <div class="w-full bg-sand/80 flex items-center justify-center p-4 min-h-[260px]">
+                                <img src="${categoryCovers['new-collection']}" alt="New Collection" class="w-full h-auto max-h-[380px] object-contain rounded-lg group-hover:scale-102 transition-transform duration-300">
                             </div>
-                            <div class="p-6 flex-grow flex flex-col justify-between">
+                            <div class="p-6 flex-grow flex flex-col justify-between border-t border-warm/20">
+                                <h3 class="font-serif text-xl font-bold text-navy mb-2">New Collection</h3>
                                 <p class="text-xs text-navy/70 leading-relaxed mb-4">${i18n[currentLang].newDesc}</p>
                                 <span class="text-xs font-bold text-rosegold uppercase tracking-widest group-hover:underline">Shop New Collection &rarr;</span>
                             </div>
@@ -646,6 +599,7 @@
         function filterCategory(cat) {
             currentCategory = cat;
             activeWeightFilter = 'all';
+            history.pushState({view: 'category', cat: cat}, '', `#${cat}`);
             renderProductsGrid();
         }
 
@@ -691,8 +645,8 @@
 
             let gridCards = filtered.map(item => `
                 <div class="bg-sand-light rounded-2xl overflow-hidden border border-warm/40 shadow-xs hover:shadow-lg transition-all flex flex-col group">
-                    <div class="h-64 sm:h-72 overflow-hidden relative">
-                        <img src="${item.img}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    <div class="h-64 sm:h-72 overflow-hidden relative bg-sand flex items-center justify-center p-2">
+                        <img src="${item.img}" alt="${item.title}" class="w-full h-full object-contain group-hover:scale-102 transition-transform duration-300">
                     </div>
                     <div class="p-4 flex-grow flex flex-col justify-between space-y-3">
                         <div>
@@ -713,18 +667,27 @@
             app.innerHTML = `
                 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
                     <div class="flex items-center justify-between mb-6">
-                        <button type="button" onclick="showHomeView()" class="text-xs font-bold text-rosegold hover:underline">&larr; Back to Home</button>
                         <h2 class="font-serif text-xl sm:text-2xl font-bold text-navy uppercase">${categoryTitle}</h2>
                     </div>
 
                     ${weightBannersHtml}
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        ${gridCards.length > 0 ? gridCards : '<p class="col-span-full text-center py-12 text-navy/60 text-xs">No products found in this category.</p>'}
+                        ${gridCards.length > 0 ? gridCards : '<p class="col-span-full text-center py-16 text-navy/60 text-xs">No products added yet. Use Admin Portal to publish your first product!</p>'}
                     </div>
                 </section>
             `;
         }
+
+        // Handle Browser Back/Forward buttons (Swipe back in iOS & Android native back)
+        window.addEventListener('popstate', (event) => {
+            if (event.state && event.state.view === 'category') {
+                currentCategory = event.state.cat;
+                renderProductsGrid();
+            } else {
+                showHomeView();
+            }
+        });
 
         // Cart Drawer Operations
         function addToCart(id) {
@@ -781,7 +744,7 @@
                     return `
                         <div class="flex items-center justify-between border-b border-warm/30 pb-3">
                             <div class="flex items-center gap-3">
-                                <img src="${item.img}" class="w-12 h-12 rounded-lg object-cover">
+                                <img src="${item.img}" class="w-12 h-12 rounded-lg object-contain bg-sand">
                                 <div>
                                     <h5 class="font-bold text-xs text-navy">${currentLang === 'ar' ? item.titleAr : item.title}</h5>
                                     <span class="text-[11px] text-rosegold font-bold">${item.price} EGP x ${item.qty}</span>
@@ -798,7 +761,6 @@
                 }).join('');
             }
 
-            // Calculate 10% Discount if total items >= 3
             let discountAmount = 0;
             if (totalItemsCount >= 3) {
                 discountAmount = Math.round(grossSubtotal * 0.10);
@@ -968,6 +930,7 @@
             if (fileJ) categoryCovers['jumpsuit-blanket'] = await readFileAsDataURL(fileJ);
             if (fileN) categoryCovers['new-collection'] = await readFileAsDataURL(fileN);
 
+            saveCoversToStorage();
             alert('Category Cover Photos Updated Successfully!');
             showHomeView();
             closeAdminModal();
@@ -989,7 +952,7 @@
             const imgUrl = await readFileAsDataURL(fileInput);
 
             products.push({
-                id: 'p' + (products.length + 1),
+                id: 'p' + Date.now(),
                 title: title,
                 titleAr: title,
                 category: cat,
@@ -999,7 +962,11 @@
                 desc: 'Exclusive new sleepwear addition.'
             });
 
-            alert('Product Published Successfully!');
+            saveProductsToStorage();
+            alert('Product Published Successfully & Saved Forever!');
+            document.getElementById('new-prod-title').value = '';
+            document.getElementById('new-prod-price').value = '';
+            document.getElementById('new-prod-file').value = '';
             filterCategory(cat);
             closeAdminModal();
         }
