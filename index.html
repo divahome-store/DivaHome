@@ -43,6 +43,11 @@
             color: #131B2A;
             margin: 0;
             padding: 0;
+            /* منع تحديد النصوص ونسخها بالكامل لحماية محتوى الموقع */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
         .font-serif {
             font-family: 'Playfair Display', Georgia, serif;
@@ -50,7 +55,7 @@
         a { text-decoration: none; }
     </style>
 </head>
-<body class="bg-sand text-navy antialiased min-h-screen flex flex-col selection:bg-rosegold selection:text-white">
+<body class="bg-sand text-navy antialiased min-h-screen flex flex-col selection:bg-rosegold selection:text-white" oncontextmenu="return false;">
 
     <!-- Top Announcement Bar -->
     <div class="bg-navy text-sand py-2.5 px-4 text-center text-[11px] sm:text-xs tracking-widest uppercase font-medium border-b border-warm/20 shadow-xs">
@@ -74,12 +79,12 @@
                 </nav>
             </div>
 
-            <!-- Brand Logo Center (Double click or quick double tap opens Admin Modal) -->
-            <div ondblclick="handleSecretAdminTrigger()" onclick="handleMobileSecretTap()" class="text-center group flex flex-col items-center cursor-pointer select-none" title="Diva Home">
-                <h1 class="font-serif text-xl sm:text-2xl lg:text-3xl font-bold tracking-[0.25em] text-navy uppercase leading-none group-hover:text-rosegold transition-colors">
+            <!-- Brand Logo Center with Double-Click Admin Trigger -->
+            <div class="text-center group flex flex-col items-center cursor-pointer select-none" onclick="showHomeView()" ondblclick="handleSecretAdminTrigger()">
+                <h1 class="font-serif text-xl sm:text-2xl lg:text-3xl font-bold tracking-[0.25em] text-navy uppercase leading-none group-hover:text-rosegold transition-colors pointer-events-none">
                     DIVA HOME
                 </h1>
-                <span class="text-[9px] uppercase tracking-[0.3em] text-rosegold font-bold mt-1">EST. 2026</span>
+                <span class="text-[9px] uppercase tracking-[0.3em] text-rosegold font-bold mt-1 pointer-events-none">EST. 2026</span>
             </div>
 
             <!-- Right Controls: Language & Cart -->
@@ -136,7 +141,7 @@
                 </a>
             </div>
         </div>
-        <div class="mt-8 pt-6 border-t border-warm/10 flex items-center justify-between text-xs text-sand/50">
+        <div class="mt-8 pt-6 border-t border-warm/10 flex flex-col sm:flex-row items-center justify-between text-xs text-sand/50 gap-4">
             <p>&copy; 2026 Diva Home. All rights reserved.</p>
         </div>
     </footer>
@@ -223,7 +228,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Default category cover placeholders (can be updated live from Admin dashboard)
         window.categoryCovers = {
             'pajamas': 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=800&q=80',
             'jumpsuit-blanket': 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80',
@@ -236,7 +240,6 @@
         window.cart = [];
         window.isAdminLoggedIn = false;
 
-        // Real-time Firestore Sync for Covers
         onSnapshot(doc(db, 'store_settings', 'covers'), (docSnap) => {
             if (docSnap.exists()) {
                 window.categoryCovers = { ...window.categoryCovers, ...docSnap.data() };
@@ -244,7 +247,6 @@
             }
         });
 
-        // Real-time Firestore Sync for Products (Live Production Store)
         onSnapshot(collection(db, 'products'), (snapshot) => {
             window.products = [];
             snapshot.forEach(docSnap => {
@@ -342,7 +344,7 @@
             let gridCards = filtered.map(item => `
                 <div class="bg-sand-light rounded-2xl overflow-hidden border border-warm/40 shadow-xs hover:shadow-lg transition-all flex flex-col group">
                     <div class="h-64 sm:h-72 overflow-hidden relative bg-sand flex items-center justify-center p-2">
-                        <img src="${item.img}" alt="${item.title}" class="w-full h-full object-contain">
+                        <img src="${item.img}" alt="${item.title}" class="w-full h-full object-contain pointer-events-none">
                     </div>
                     <div class="p-4 flex-grow flex flex-col justify-between space-y-3">
                         <div>
@@ -368,20 +370,6 @@
                 </section>
             `;
         }
-
-        // Secret Tap Support for Mobile & Desktop
-        let tapCount = 0;
-        let tapTimer = null;
-        window.handleMobileSecretTap = function() {
-            tapCount++;
-            clearTimeout(tapTimer);
-            if (tapCount >= 2) {
-                tapCount = 0;
-                window.handleSecretAdminTrigger();
-            } else {
-                tapTimer = setTimeout(() => { tapCount = 0; }, 400);
-            }
-        };
 
         window.handleSecretAdminTrigger = function() {
             if (!window.isAdminLoggedIn) {
@@ -414,7 +402,7 @@
             let productRows = window.products.map(p => `
                 <div class="flex items-center justify-between bg-sand p-3 rounded-xl border border-warm/40">
                     <div class="flex items-center gap-3">
-                        <img src="${p.img}" class="w-12 h-12 object-cover rounded-lg border">
+                        <img src="${p.img}" class="w-12 h-12 object-cover rounded-lg border pointer-events-none">
                         <div>
                             <h4 class="font-bold text-xs text-navy">${p.title}</h4>
                             <p class="text-[10px] text-rosegold">${p.category} | ${p.price} EGP</p>
@@ -437,7 +425,7 @@
                     <!-- Section 1: Category Cover Image Links -->
                     <div class="bg-sand-light p-6 rounded-2xl border border-warm/60 shadow-md space-y-4">
                         <h3 class="font-serif text-lg font-bold text-navy border-b pb-2">1. Update Category Cover Image URLs</h3>
-                        <form onsubmit="handleUpdateCovers(event)" class="space-y-4 text-xs">
+                        <form id="cover-form" onsubmit="handleUpdateCovers(event)" class="space-y-4 text-xs">
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div class="space-y-1">
                                     <label class="block font-bold text-navy">Pajamas Cover URL</label>
@@ -459,7 +447,7 @@
                     <!-- Section 2: Add New Product -->
                     <div class="bg-sand-light p-6 rounded-2xl border border-warm/60 shadow-md space-y-4">
                         <h3 class="font-serif text-lg font-bold text-navy border-b pb-2">2. Add New Product (Image URL)</h3>
-                        <form onsubmit="handleAddProduct(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                        <form id="product-form" onsubmit="handleAddProduct(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                             <div>
                                 <label class="block font-bold text-navy mb-1">Product Title *</label>
                                 <input type="text" id="p-title" required class="w-full p-2.5 rounded-lg border border-warm bg-white focus:outline-none focus:border-rosegold" placeholder="e.g., Silk Pink Pajama Set">
@@ -529,6 +517,7 @@
                 });
 
                 alert('✅ Product published live for everyone!');
+                document.getElementById('product-form').reset();
                 renderFullAdminDashboard();
             } catch (err) {
                 alert('Error: ' + err.message);
@@ -566,7 +555,7 @@
 
         window.openCartDrawer = function() { document.getElementById('cart-drawer').classList.remove('translate-x-full'); };
         window.closeCartDrawer = function() { document.getElementById('cart-drawer').classList.add('translate-x-full'); };
-        window.openCheckoutModal = function() { closeCartDrawer(); document.getElementById('checkout-modal').classList.remove('hidden'); };
+        window.openCheckoutModal = function() { closeCartDrawer(); document.getElementById('checkout-modal').classList.add('hidden'); };
         window.closeCheckoutModal = function() { document.getElementById('checkout-modal').classList.add('hidden'); };
         window.handlePlaceOrder = function(e) { e.preventDefault(); alert('🎉 Order placed successfully!'); window.cart = []; updateCartUI(); closeCheckoutModal(); };
         window.toggleMobileMenu = function() { document.getElementById('mobile-menu').classList.toggle('hidden'); };
@@ -576,7 +565,3 @@
     </script>
 </body>
 </html>
-```
-eof
-
-كل شيء أصبح جاهزاً ومنظماً تماماً يا منة! انسخي الكود واطرحيه في مستودعكِ، وافتحي لوحة التحكم وأضيفي منتجاتكِ وصور أقسامك بكل ثقة ومبروك مقدماً لمتجركِ الحقيقي! 🤍✨
