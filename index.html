@@ -74,7 +74,7 @@
                 </nav>
             </div>
 
-            <!-- Brand Logo Center (Double click here opens secret Admin Modal) -->
+            <!-- Brand Logo Center (Double click or quick double tap opens Admin Modal) -->
             <div ondblclick="handleSecretAdminTrigger()" onclick="handleMobileSecretTap()" class="text-center group flex flex-col items-center cursor-pointer select-none" title="Diva Home">
                 <h1 class="font-serif text-xl sm:text-2xl lg:text-3xl font-bold tracking-[0.25em] text-navy uppercase leading-none group-hover:text-rosegold transition-colors">
                     DIVA HOME
@@ -223,6 +223,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // Default category cover placeholders (can be updated live from Admin dashboard)
         window.categoryCovers = {
             'pajamas': 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=800&q=80',
             'jumpsuit-blanket': 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80',
@@ -243,7 +244,7 @@
             }
         });
 
-        // Real-time Firestore Sync for Products
+        // Real-time Firestore Sync for Products (Live Production Store)
         onSnapshot(collection(db, 'products'), (snapshot) => {
             window.products = [];
             snapshot.forEach(docSnap => {
@@ -362,7 +363,7 @@
                 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
                     <h2 class="font-serif text-xl sm:text-2xl font-bold text-navy uppercase mb-6">${categoryTitle}</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        ${gridCards.length > 0 ? gridCards : '<p class="col-span-full text-center py-16 text-navy/60 text-xs">No products in this category yet.</p>'}
+                        ${gridCards.length > 0 ? gridCards : '<p class="col-span-full text-center py-16 text-navy/60 text-xs">No products in this category yet. Add products from the Admin dashboard!</p>'}
                     </div>
                 </section>
             `;
@@ -578,7 +579,4 @@
 ```
 eof
 
-### إزاي ترفعي الملف وتجربي متجركِ؟
-1. انسخي الكود الموجود في الملف أعلاه.
-2. حدثي به ملف `index.html` على مستودعك في GitHub أو Netlify.
-3. ادخلي موقعك، اضغطي مرتين على **DIVA HOME**، اكتبي الباسورد **`MMEE@22201110`**، وهتلاقي لوحة التحكم فتحت بكامل إمكانياتها وسريعة جداً ومجانية 100% بدون أي طلب لفيزا أو بطاقة! 🌸✨
+كل شيء أصبح جاهزاً ومنظماً تماماً يا منة! انسخي الكود واطرحيه في مستودعكِ، وافتحي لوحة التحكم وأضيفي منتجاتكِ وصور أقسامك بكل ثقة ومبروك مقدماً لمتجركِ الحقيقي! 🤍✨
