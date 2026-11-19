@@ -512,6 +512,12 @@
         window.cart = [];
         window.isAdminLoggedIn = false;
 
+        function scrollToPageTop() {
+            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+        }
+
         function navigateToState(state, replace = false) {
             try {
                 if (replace) {
@@ -761,7 +767,7 @@
             window.currentView = 'home';
             window.currentCategory = 'all';
             window.currentSizeFilter = 'all';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            scrollToPageTop();
             updateCartUI();
 
             const appContainer = document.getElementById('app-view');
@@ -882,7 +888,7 @@
 
         function renderProductsGridInternal() {
             window.currentView = 'category';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            scrollToPageTop();
             updateCartUI();
 
             const appContainer = document.getElementById('app-view');
@@ -931,44 +937,38 @@
                 const isSoldOut = Boolean(item.soldOut);
 
                 const slidesHTML = imgList.map((src, idx) => `
-                    <div class="w-full h-full shrink-0 snap-center flex items-center justify-center p-2">
-                        <img src="${src}" onerror="this.src='https://placehold.co/400x500/F7EFEF/131B2A?text=Diva+Home'" alt="${item.title} ${idx + 1}" class="w-full h-full object-contain pointer-events-none ${isSoldOut ? 'grayscale-[40%]' : ''}">
+                    <div class="w-full shrink-0 snap-center">
+                        <img src="${src}" onerror="this.src='https://placehold.co/400x500/F7EFEF/131B2A?text=Diva+Home'" alt="${item.title} ${idx + 1}" class="w-full h-48 sm:h-72 lg:h-80 object-cover block pointer-events-none ${isSoldOut ? 'grayscale-[40%]' : ''}">
                     </div>
                 `).join('');
 
                 const dotsHTML = hasMultiple ? `
-                    <div onclick="event.stopPropagation()" class="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-navy/45 backdrop-blur-xs px-2 py-1 rounded-full z-10">
+                    <div onclick="event.stopPropagation()" class="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-navy/45 backdrop-blur-xs px-1.5 py-0.5 rounded-full z-10">
                         ${imgList.map((_, idx) => `
                             <span data-dot-idx="${idx}" onclick="goToSlide('card-slider-${item.id}', ${idx})" class="w-1.5 h-1.5 rounded-full transition-all cursor-pointer ${idx === 0 ? 'bg-white scale-125' : 'bg-white/50'}"></span>
                         `).join('')}
                     </div>
                 ` : '';
 
-                const arrowsHTML = hasMultiple ? `
-                    <button type="button" onclick="event.stopPropagation(); stepSlide('card-slider-${item.id}', -1)" class="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-sand-light/90 hover:bg-rosegold text-navy hover:text-white shadow-md flex items-center justify-center text-xs font-bold z-10 cursor-pointer transition-colors" aria-label="Previous photo">&lsaquo;</button>
-                    <button type="button" onclick="event.stopPropagation(); stepSlide('card-slider-${item.id}', 1)" class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-sand-light/90 hover:bg-rosegold text-navy hover:text-white shadow-md flex items-center justify-center text-xs font-bold z-10 cursor-pointer transition-colors" aria-label="Next photo">&rsaquo;</button>
-                ` : '';
-
                 return `
                     <div onclick="openProductPage('${item.id}')" class="bg-sand-light rounded-2xl overflow-hidden border border-warm/40 shadow-xs hover:shadow-lg transition-all flex flex-col group cursor-pointer ${isSoldOut ? 'opacity-85' : ''}">
-                        <div class="h-64 sm:h-72 overflow-hidden relative bg-sand">
-                            <div id="card-slider-${item.id}" dir="ltr" onscroll="syncSliderDots('card-slider-${item.id}')" class="w-full h-full flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar touch-pan-x">
+                        <div class="w-full overflow-hidden relative bg-sand">
+                            <div id="card-slider-${item.id}" dir="ltr" onscroll="syncSliderDots('card-slider-${item.id}')" class="w-full flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar touch-pan-x">
                                 ${slidesHTML}
                             </div>
-                            ${arrowsHTML}
                             ${dotsHTML}
-                            ${isSoldOut ? `<span class="absolute top-3 left-3 bg-red-600 text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow-md z-10">${i18n[window.currentLang].soldOut}</span>` : ''}
-                            ${colorsCount ? `<span class="absolute top-3 right-3 bg-rosegold text-white text-[10px] px-2.5 py-0.5 rounded-full font-bold shadow-xs z-10">${colorsCount}</span>` : ''}
+                            ${isSoldOut ? `<span class="absolute top-2 left-2 bg-red-600 text-white text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider shadow-md z-10">${i18n[window.currentLang].soldOut}</span>` : ''}
+                            ${colorsCount ? `<span class="absolute top-2 right-2 bg-rosegold text-white text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full font-bold shadow-xs z-10">${colorsCount}</span>` : ''}
                         </div>
-                        <div class="p-4 flex-grow flex flex-col justify-between space-y-3">
+                        <div class="p-2.5 sm:p-4 flex-grow flex flex-col justify-between space-y-2 sm:space-y-3">
                             <div>
-                                <span class="text-[10px] uppercase font-bold text-rosegold">${item.category} ${item.size ? '| Size: ' + item.size : ''}</span>
-                                <h3 class="font-bold text-sm text-navy mt-1">${item.title}</h3>
+                                <span class="text-[9px] sm:text-[10px] uppercase font-bold text-rosegold line-clamp-1">${item.category} ${item.size ? '| ' + item.size : ''}</span>
+                                <h3 class="font-bold text-xs sm:text-sm text-navy mt-0.5 line-clamp-2 leading-snug">${item.title}</h3>
                             </div>
-                            <div class="space-y-2.5 pt-2 border-t border-warm/30">
-                                <div class="flex items-center justify-between">
-                                    <span class="font-bold text-sm text-navy">${item.price} EGP</span>
-                                    <span class="text-[11px] font-semibold ${isSoldOut ? 'text-red-500' : 'text-rosegold'}">${isSoldOut ? i18n[window.currentLang].soldOut : i18n[window.currentLang].viewDetails + ' &rarr;'}</span>
+                            <div class="space-y-2 pt-1.5 border-t border-warm/30">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span class="font-bold text-xs sm:text-sm text-navy">${item.price} EGP</span>
+                                    <span class="text-[10px] sm:text-[11px] font-semibold ${isSoldOut ? 'text-red-500' : 'text-rosegold'}">${isSoldOut ? i18n[window.currentLang].soldOut : i18n[window.currentLang].viewDetails}</span>
                                 </div>
                                 ${renderProductCardControls(item)}
                             </div>
@@ -978,7 +978,7 @@
             }).join('');
 
             appContainer.innerHTML = `
-                <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <section class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8">
                     <div class="flex items-center justify-between mb-6">
                         <div class="flex items-center gap-3">
                             <button type="button" onclick="goBackStep()" class="px-3.5 py-2 rounded-xl bg-sand-light border border-warm/60 text-navy hover:bg-beige text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer">
@@ -990,7 +990,7 @@
                     </div>
                     ${sizeFilterBar}
                     ${activeSizeNoteBox}
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
                         ${gridCards.length > 0 ? gridCards : `<p class="col-span-full text-center py-16 text-navy/60 text-xs">${i18n[window.currentLang].emptyCategory}</p>`}
                     </div>
                 </section>
@@ -1008,7 +1008,7 @@
 
         function renderProductDetailInternal(id) {
             window.currentView = 'product';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            scrollToPageTop();
             updateCartUI();
 
             const prod = window.products.find(p => p.id === id);
@@ -1031,30 +1031,15 @@
             else if (prod.size === 'L') sizeNoteText = i18n[window.currentLang].sizeNoteL;
 
             const detailSlidesHTML = imgList.map((im, idx) => `
-                <div class="w-full shrink-0 snap-center flex items-center justify-center">
-                    <img src="${im}" onerror="this.src='https://placehold.co/400x500/F7EFEF/131B2A?text=Diva+Home'" alt="${prod.title} ${idx + 1}" class="w-full max-h-[460px] object-contain rounded-xl pointer-events-none ${isSoldOut ? 'grayscale-[40%]' : ''}">
+                <div class="w-full shrink-0 snap-center flex items-center justify-center bg-sand">
+                    <img src="${im}" onerror="this.src='https://placehold.co/400x500/F7EFEF/131B2A?text=Diva+Home'" alt="${prod.title} ${idx + 1}" class="w-full h-[42vh] sm:h-[48vh] object-contain mx-auto block pointer-events-none ${isSoldOut ? 'grayscale-[40%]' : ''}">
                 </div>
             `).join('');
 
-            const detailArrowsHTML = hasMultiple ? `
-                <button type="button" onclick="stepSlide('detail-slider', -1)" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-sand-light/95 hover:bg-rosegold text-navy hover:text-white shadow-md flex items-center justify-center text-base font-bold z-10 cursor-pointer transition-colors" aria-label="Previous photo">&lsaquo;</button>
-                <button type="button" onclick="stepSlide('detail-slider', 1)" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-sand-light/95 hover:bg-rosegold text-navy hover:text-white shadow-md flex items-center justify-center text-base font-bold z-10 cursor-pointer transition-colors" aria-label="Next photo">&rsaquo;</button>
-            ` : '';
-
             const detailDotsHTML = hasMultiple ? `
-                <div class="flex items-center gap-2 mt-3 justify-center">
+                <div class="flex items-center gap-2 py-2 justify-center bg-sand">
                     ${imgList.map((_, idx) => `
                         <span data-dot-idx="${idx}" onclick="goToSlide('detail-slider', ${idx})" class="w-2 h-2 rounded-full transition-all cursor-pointer ${idx === 0 ? 'bg-rosegold scale-125' : 'bg-warm'}"></span>
-                    `).join('')}
-                </div>
-            ` : '';
-
-            const thumbsHTML = hasMultiple ? `
-                <div class="flex gap-2.5 mt-3 overflow-x-auto justify-center pb-1">
-                    ${imgList.map((im, idx) => `
-                        <div onclick="goToSlide('detail-slider', ${idx})" class="w-16 h-16 rounded-xl border-2 border-warm cursor-pointer hover:border-rosegold overflow-hidden shrink-0 bg-white">
-                            <img src="${im}" class="w-full h-full object-cover pointer-events-none">
-                        </div>
                     `).join('')}
                 </div>
             ` : '';
@@ -1064,70 +1049,70 @@
                 : i18n[window.currentLang].noDescription;
 
             appContainer.innerHTML = `
-                <section class="max-w-3xl mx-auto px-4 sm:px-6 py-8">
-                    <div class="mb-6 flex items-center justify-between">
-                        <button type="button" onclick="goBackStep()" class="px-4 py-2 rounded-xl bg-sand-light border border-warm/60 text-navy hover:bg-beige text-xs font-bold flex items-center gap-2 shadow-xs cursor-pointer">
+                <section class="max-w-3xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+                    <div class="mb-3 flex items-center justify-between">
+                        <button type="button" onclick="goBackStep()" class="px-3.5 py-1.5 rounded-xl bg-sand-light border border-warm/60 text-navy hover:bg-beige text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer">
                             <span>&larr;</span>
                             <span>${i18n[window.currentLang].backBtn}</span>
                         </button>
                         <span class="text-[11px] uppercase font-bold tracking-widest text-rosegold">${prod.category.replace('-', ' ')}</span>
                     </div>
 
-                    <div class="bg-sand-light rounded-3xl border border-warm/60 shadow-md overflow-hidden p-5 sm:p-8 space-y-6">
-                        <div class="bg-sand rounded-2xl p-4 flex flex-col items-center justify-center relative">
-                            ${isSoldOut ? `<span class="absolute top-4 left-4 bg-red-600 text-white text-xs px-3.5 py-1 rounded-full font-bold uppercase tracking-wider shadow-md z-10">${i18n[window.currentLang].soldOut}</span>` : ''}
+                    <div class="bg-sand-light rounded-3xl border border-warm/60 shadow-md overflow-hidden">
+                        <div class="w-full bg-sand relative border-b border-warm/30">
+                            ${isSoldOut ? `<span class="absolute top-3 left-3 bg-red-600 text-white text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow-md z-10">${i18n[window.currentLang].soldOut}</span>` : ''}
                             <div id="detail-slider" dir="ltr" onscroll="syncSliderDots('detail-slider')" class="w-full flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar touch-pan-x">
                                 ${detailSlidesHTML}
                             </div>
-                            ${detailArrowsHTML}
                             ${detailDotsHTML}
-                            ${thumbsHTML}
                         </div>
 
-                        <div class="border-b border-warm/40 pb-5 space-y-2">
-                            <h1 class="font-serif text-2xl sm:text-3xl font-bold text-navy">${prod.title}</h1>
-                            <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
-                                <p class="text-xl sm:text-2xl font-bold text-rosegold">${prod.price} EGP</p>
-                                ${prod.size ? `<span class="text-xs font-bold bg-beige text-navy px-3.5 py-1.5 rounded-xl border border-warm/50">Size: ${prod.size}</span>` : ''}
-                            </div>
-                            ${sizeNoteText ? `<p class="text-xs text-navy/75 font-semibold pt-1">${sizeNoteText}</p>` : ''}
-                            ${colorsList.length > 0 ? `
-                                <div class="pt-3 space-y-2">
-                                    <span class="text-xs font-bold text-navy block">${i18n[window.currentLang].selectColorLabel} <span class="text-rosegold">${activeColor}</span></span>
-                                    <div class="flex flex-wrap gap-2">
-                                        ${colorsList.map(c => {
-                                            const isSelected = c === activeColor;
-                                            return `<button type="button" onclick="selectProductColor('${prod.id}', '${c.replace(/'/g, "\\'")}')" class="px-3.5 py-2 rounded-xl text-xs font-bold border-2 transition-all cursor-pointer ${isSelected ? 'bg-rosegold text-white border-rosegold shadow-sm' : 'bg-sand text-navy border-warm hover:border-rosegold'}">${c}</button>`;
-                                        }).join('')}
-                                    </div>
+                        <div class="p-4 sm:p-6 space-y-4">
+                            <div class="border-b border-warm/40 pb-4 space-y-1.5">
+                                <h1 class="font-serif text-xl sm:text-2xl font-bold text-navy">${prod.title}</h1>
+                                <div class="flex flex-wrap items-center justify-between gap-2 pt-0.5">
+                                    <p class="text-lg sm:text-xl font-bold text-rosegold">${prod.price} EGP</p>
+                                    ${prod.size ? `<span class="text-xs font-bold bg-beige text-navy px-3 py-1 rounded-xl border border-warm/50">Size: ${prod.size}</span>` : ''}
                                 </div>
-                            ` : ''}
-                        </div>
-
-                        <div class="space-y-2">
-                            <h3 class="text-xs uppercase tracking-widest font-bold text-navy/60">${i18n[window.currentLang].productDescTitle}</h3>
-                            <p class="text-sm text-navy/85 leading-relaxed">${descriptionContent}</p>
-                        </div>
-
-                        <div class="pt-2">
-                            ${isSoldOut
-                                ? `<button type="button" disabled class="w-full py-4 bg-gray-400 text-white font-bold rounded-2xl text-xs uppercase tracking-widest cursor-not-allowed">${i18n[window.currentLang].soldOut}</button>`
-                                : `
-                                    <div class="space-y-3">
-                                        ${activeColorCount > 0 ? `
-                                            <div class="flex items-center justify-between bg-beige border border-rosegold/40 rounded-2xl px-4 py-3">
-                                                <span class="text-xs font-bold text-rosegold">${i18n[window.currentLang].selectedCountLabel(activeColorCount)} ${activeColor ? `(${activeColor})` : ''}</span>
-                                                <div class="flex items-center gap-3">
-                                                    <button type="button" onclick="removeOneProductById('${prod.id}', '${activeColor.replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-xl bg-sand-light border border-warm text-navy hover:bg-rosegold hover:text-white font-bold text-sm flex items-center justify-center cursor-pointer transition-colors">-</button>
-                                                    <span class="text-sm font-bold text-navy min-w-[20px] text-center">${activeColorCount}</span>
-                                                    <button type="button" onclick="addProductToCartById('${prod.id}', '${activeColor.replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-xl bg-navy hover:bg-rosegold text-sand font-bold text-sm flex items-center justify-center cursor-pointer transition-colors">+</button>
-                                                </div>
-                                            </div>
-                                        ` : ''}
-                                        <button type="button" onclick="addProductToCartById('${prod.id}', '${activeColor.replace(/'/g, "\\'")}')" class="w-full py-4 bg-navy hover:bg-rosegold text-sand font-bold rounded-2xl text-xs sm:text-sm uppercase tracking-widest transition-all cursor-pointer shadow-lg">${i18n[window.currentLang].addToBag} ${activeColor ? `(${activeColor})` : ''}</button>
+                                ${sizeNoteText ? `<p class="text-xs text-navy/75 font-semibold pt-1">${sizeNoteText}</p>` : ''}
+                                ${colorsList.length > 0 ? `
+                                    <div class="pt-3 space-y-2">
+                                        <span class="text-xs font-bold text-navy block">${i18n[window.currentLang].selectColorLabel} <span class="text-rosegold">${activeColor}</span></span>
+                                        <div class="flex flex-wrap gap-2">
+                                            ${colorsList.map(c => {
+                                                const isSelected = c === activeColor;
+                                                return `<button type="button" onclick="selectProductColor('${prod.id}', '${c.replace(/'/g, "\\'")}')" class="px-3.5 py-2 rounded-xl text-xs font-bold border-2 transition-all cursor-pointer ${isSelected ? 'bg-rosegold text-white border-rosegold shadow-sm' : 'bg-sand text-navy border-warm hover:border-rosegold'}">${c}</button>`;
+                                            }).join('')}
+                                        </div>
                                     </div>
-                                `
-                            }
+                                ` : ''}
+                            </div>
+
+                            <div class="space-y-2">
+                                <h3 class="text-xs uppercase tracking-widest font-bold text-navy/60">${i18n[window.currentLang].productDescTitle}</h3>
+                                <p class="text-sm text-navy/85 leading-relaxed">${descriptionContent}</p>
+                            </div>
+
+                            <div class="pt-2">
+                                ${isSoldOut
+                                    ? `<button type="button" disabled class="w-full py-4 bg-gray-400 text-white font-bold rounded-2xl text-xs uppercase tracking-widest cursor-not-allowed">${i18n[window.currentLang].soldOut}</button>`
+                                    : `
+                                        <div class="space-y-3">
+                                            ${activeColorCount > 0 ? `
+                                                <div class="flex items-center justify-between bg-beige border border-rosegold/40 rounded-2xl px-4 py-3">
+                                                    <span class="text-xs font-bold text-rosegold">${i18n[window.currentLang].selectedCountLabel(activeColorCount)} ${activeColor ? `(${activeColor})` : ''}</span>
+                                                    <div class="flex items-center gap-3">
+                                                        <button type="button" onclick="removeOneProductById('${prod.id}', '${activeColor.replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-xl bg-sand-light border border-warm text-navy hover:bg-rosegold hover:text-white font-bold text-sm flex items-center justify-center cursor-pointer transition-colors">-</button>
+                                                        <span class="text-sm font-bold text-navy min-w-[20px] text-center">${activeColorCount}</span>
+                                                        <button type="button" onclick="addProductToCartById('${prod.id}', '${activeColor.replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-xl bg-navy hover:bg-rosegold text-sand font-bold text-sm flex items-center justify-center cursor-pointer transition-colors">+</button>
+                                                    </div>
+                                                </div>
+                                            ` : ''}
+                                            <button type="button" onclick="addProductToCartById('${prod.id}', '${activeColor.replace(/'/g, "\\'")}')" class="w-full py-4 bg-navy hover:bg-rosegold text-sand font-bold rounded-2xl text-xs sm:text-sm uppercase tracking-widest transition-all cursor-pointer shadow-lg">${i18n[window.currentLang].addToBag} ${activeColor ? `(${activeColor})` : ''}</button>
+                                        </div>
+                                    `
+                                }
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -1230,6 +1215,7 @@
         function renderFullAdminDashboardInternal() {
             window.currentView = 'admin';
             window.currentCategory = 'admin';
+            scrollToPageTop();
             updateCartUI();
             const appContainer = document.getElementById('app-view');
 
