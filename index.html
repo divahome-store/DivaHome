@@ -162,6 +162,13 @@
             pointer-events: none;
             -webkit-user-drag: none;
         }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
         a { text-decoration: none; }
     </style>
 </head>
@@ -918,17 +925,40 @@
             let categoryTitle = window.currentCategory.replace('-', ' ').toUpperCase();
 
             let gridCards = filtered.map(item => {
-                const displayImg = (item.images && item.images.length > 0) ? item.images[0] : (item.img || 'https://placehold.co/400x500/F7EFEF/131B2A?text=Diva');
-                const imgCount = (item.images && item.images.length > 1) ? ` (+${item.images.length - 1})` : '';
+                const imgList = (item.images && item.images.length > 0) ? item.images : [item.img || 'https://placehold.co/400x500/F7EFEF/131B2A?text=Diva'];
+                const hasMultiple = imgList.length > 1;
                 const colorsCount = (item.colors && item.colors.length > 1) ? `${item.colors.length} Colors` : '';
                 const isSoldOut = Boolean(item.soldOut);
+
+                const slidesHTML = imgList.map((src, idx) => `
+                    <div class="w-full h-full shrink-0 snap-center flex items-center justify-center p-2">
+                        <img src="${src}" onerror="this.src='https://placehold.co/400x500/F7EFEF/131B2A?text=Diva+Home'" alt="${item.title} ${idx + 1}" class="w-full h-full object-contain pointer-events-none ${isSoldOut ? 'grayscale-[40%]' : ''}">
+                    </div>
+                `).join('');
+
+                const dotsHTML = hasMultiple ? `
+                    <div onclick="event.stopPropagation()" class="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-navy/45 backdrop-blur-xs px-2 py-1 rounded-full z-10">
+                        ${imgList.map((_, idx) => `
+                            <span data-dot-idx="${idx}" onclick="goToSlide('card-slider-${item.id}', ${idx})" class="w-1.5 h-1.5 rounded-full transition-all cursor-pointer ${idx === 0 ? 'bg-white scale-125' : 'bg-white/50'}"></span>
+                        `).join('')}
+                    </div>
+                ` : '';
+
+                const arrowsHTML = hasMultiple ? `
+                    <button type="button" onclick="event.stopPropagation(); stepSlide('card-slider-${item.id}', -1)" class="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-sand-light/90 hover:bg-rosegold text-navy hover:text-white shadow-md flex items-center justify-center text-xs font-bold z-10 cursor-pointer transition-colors" aria-label="Previous photo">&lsaquo;</button>
+                    <button type="button" onclick="event.stopPropagation(); stepSlide('card-slider-${item.id}', 1)" class="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-sand-light/90 hover:bg-rosegold text-navy hover:text-white shadow-md flex items-center justify-center text-xs font-bold z-10 cursor-pointer transition-colors" aria-label="Next photo">&rsaquo;</button>
+                ` : '';
+
                 return `
                     <div onclick="openProductPage('${item.id}')" class="bg-sand-light rounded-2xl overflow-hidden border border-warm/40 shadow-xs hover:shadow-lg transition-all flex flex-col group cursor-pointer ${isSoldOut ? 'opacity-85' : ''}">
-                        <div class="h-64 sm:h-72 overflow-hidden relative bg-sand flex items-center justify-center p-2">
-                            <img src="${displayImg}" onerror="this.src='https://placehold.co/400x500/F7EFEF/131B2A?text=Diva+Home'" alt="${item.title}" class="w-full h-full object-contain pointer-events-none ${isSoldOut ? 'grayscale-[40%]' : ''}">
-                            ${isSoldOut ? `<span class="absolute top-3 left-3 bg-red-600 text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow-md">${i18n[window.currentLang].soldOut}</span>` : ''}
-                            ${colorsCount ? `<span class="absolute top-3 right-3 bg-rosegold text-white text-[10px] px-2.5 py-0.5 rounded-full font-bold shadow-xs">${colorsCount}</span>` : ''}
-                            ${imgCount ? `<span class="absolute bottom-2 right-2 bg-navy/80 text-white text-[10px] px-2 py-0.5 rounded-md font-bold">${imgCount} photos</span>` : ''}
+                        <div class="h-64 sm:h-72 overflow-hidden relative bg-sand">
+                            <div id="card-slider-${item.id}" dir="ltr" onscroll="syncSliderDots('card-slider-${item.id}')" class="w-full h-full flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar touch-pan-x">
+                                ${slidesHTML}
+                            </div>
+                            ${arrowsHTML}
+                            ${dotsHTML}
+                            ${isSoldOut ? `<span class="absolute top-3 left-3 bg-red-600 text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow-md z-10">${i18n[window.currentLang].soldOut}</span>` : ''}
+                            ${colorsCount ? `<span class="absolute top-3 right-3 bg-rosegold text-white text-[10px] px-2.5 py-0.5 rounded-full font-bold shadow-xs z-10">${colorsCount}</span>` : ''}
                         </div>
                         <div class="p-4 flex-grow flex flex-col justify-between space-y-3">
                             <div>
@@ -990,6 +1020,7 @@
             }
 
             const imgList = (prod.images && prod.images.length > 0) ? prod.images : [prod.img || 'https://placehold.co/400x500/F7EFEF/131B2A?text=Diva'];
+            const hasMultiple = imgList.length > 1;
             const colorsList = Array.isArray(prod.colors) ? prod.colors : [];
             const activeColor = getSelectedColorForProduct(prod);
             const activeColorCount = getProductCartCount(prod.id, activeColor);
@@ -999,10 +1030,29 @@
             if (prod.size === 'M') sizeNoteText = i18n[window.currentLang].sizeNoteM;
             else if (prod.size === 'L') sizeNoteText = i18n[window.currentLang].sizeNoteL;
 
-            const thumbsHTML = imgList.length > 1 ? `
-                <div class="flex gap-2.5 mt-4 overflow-x-auto justify-center pb-1">
-                    ${imgList.map(im => `
-                        <div onclick="document.getElementById('detail-main-img').src='${im}'" class="w-16 h-16 rounded-xl border-2 border-warm cursor-pointer hover:border-rosegold overflow-hidden shrink-0 bg-white">
+            const detailSlidesHTML = imgList.map((im, idx) => `
+                <div class="w-full shrink-0 snap-center flex items-center justify-center">
+                    <img src="${im}" onerror="this.src='https://placehold.co/400x500/F7EFEF/131B2A?text=Diva+Home'" alt="${prod.title} ${idx + 1}" class="w-full max-h-[460px] object-contain rounded-xl pointer-events-none ${isSoldOut ? 'grayscale-[40%]' : ''}">
+                </div>
+            `).join('');
+
+            const detailArrowsHTML = hasMultiple ? `
+                <button type="button" onclick="stepSlide('detail-slider', -1)" class="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-sand-light/95 hover:bg-rosegold text-navy hover:text-white shadow-md flex items-center justify-center text-base font-bold z-10 cursor-pointer transition-colors" aria-label="Previous photo">&lsaquo;</button>
+                <button type="button" onclick="stepSlide('detail-slider', 1)" class="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-sand-light/95 hover:bg-rosegold text-navy hover:text-white shadow-md flex items-center justify-center text-base font-bold z-10 cursor-pointer transition-colors" aria-label="Next photo">&rsaquo;</button>
+            ` : '';
+
+            const detailDotsHTML = hasMultiple ? `
+                <div class="flex items-center gap-2 mt-3 justify-center">
+                    ${imgList.map((_, idx) => `
+                        <span data-dot-idx="${idx}" onclick="goToSlide('detail-slider', ${idx})" class="w-2 h-2 rounded-full transition-all cursor-pointer ${idx === 0 ? 'bg-rosegold scale-125' : 'bg-warm'}"></span>
+                    `).join('')}
+                </div>
+            ` : '';
+
+            const thumbsHTML = hasMultiple ? `
+                <div class="flex gap-2.5 mt-3 overflow-x-auto justify-center pb-1">
+                    ${imgList.map((im, idx) => `
+                        <div onclick="goToSlide('detail-slider', ${idx})" class="w-16 h-16 rounded-xl border-2 border-warm cursor-pointer hover:border-rosegold overflow-hidden shrink-0 bg-white">
                             <img src="${im}" class="w-full h-full object-cover pointer-events-none">
                         </div>
                     `).join('')}
@@ -1025,8 +1075,12 @@
 
                     <div class="bg-sand-light rounded-3xl border border-warm/60 shadow-md overflow-hidden p-5 sm:p-8 space-y-6">
                         <div class="bg-sand rounded-2xl p-4 flex flex-col items-center justify-center relative">
-                            ${isSoldOut ? `<span class="absolute top-4 left-4 bg-red-600 text-white text-xs px-3.5 py-1 rounded-full font-bold uppercase tracking-wider shadow-md">${i18n[window.currentLang].soldOut}</span>` : ''}
-                            <img id="detail-main-img" src="${imgList[0]}" onerror="this.src='https://placehold.co/400x500/F7EFEF/131B2A?text=Diva+Home'" alt="${prod.title}" class="w-full max-h-[460px] object-contain rounded-xl pointer-events-none ${isSoldOut ? 'grayscale-[40%]' : ''}">
+                            ${isSoldOut ? `<span class="absolute top-4 left-4 bg-red-600 text-white text-xs px-3.5 py-1 rounded-full font-bold uppercase tracking-wider shadow-md z-10">${i18n[window.currentLang].soldOut}</span>` : ''}
+                            <div id="detail-slider" dir="ltr" onscroll="syncSliderDots('detail-slider')" class="w-full flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar touch-pan-x">
+                                ${detailSlidesHTML}
+                            </div>
+                            ${detailArrowsHTML}
+                            ${detailDotsHTML}
                             ${thumbsHTML}
                         </div>
 
@@ -1097,6 +1151,43 @@
             showToast(window.currentLang === 'ar'
                 ? `تمت الإضافة للسلة${chosenColor ? ' (' + chosenColor + ')' : ''}! اضغطي بالأسفل لإتمام الطلب`
                 : `Added to basket${chosenColor ? ' (' + chosenColor + ')' : ''}! Tap the bar below when ready.`);
+        };
+
+        window.goToSlide = function(sliderId, index) {
+            const slider = document.getElementById(sliderId);
+            if (!slider) return;
+            const width = slider.clientWidth;
+            slider.scrollTo({ left: width * index, behavior: 'smooth' });
+        };
+
+        window.stepSlide = function(sliderId, delta) {
+            const slider = document.getElementById(sliderId);
+            if (!slider) return;
+            const width = slider.clientWidth || 1;
+            const totalSlides = slider.children.length;
+            const currentIndex = Math.round(slider.scrollLeft / width);
+            const nextIndex = (currentIndex + delta + totalSlides) % totalSlides;
+            slider.scrollTo({ left: width * nextIndex, behavior: 'smooth' });
+        };
+
+        window.syncSliderDots = function(sliderId) {
+            const slider = document.getElementById(sliderId);
+            if (!slider) return;
+            const width = slider.clientWidth || 1;
+            const activeIndex = Math.round(slider.scrollLeft / width);
+            const parent = slider.parentElement;
+            if (!parent) return;
+            const dots = parent.querySelectorAll('[data-dot-idx]');
+            const isDetail = sliderId === 'detail-slider';
+            dots.forEach((dot, idx) => {
+                if (idx === activeIndex) {
+                    dot.classList.add('scale-125', isDetail ? 'bg-rosegold' : 'bg-white');
+                    dot.classList.remove(isDetail ? 'bg-warm' : 'bg-white/50');
+                } else {
+                    dot.classList.remove('scale-125', isDetail ? 'bg-rosegold' : 'bg-white');
+                    dot.classList.add(isDetail ? 'bg-warm' : 'bg-white/50');
+                }
+            });
         };
 
         window.removeOneProductById = function(id, color = null) {
