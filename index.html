@@ -190,7 +190,7 @@
 
     <!-- Top Announcement Bar -->
     <div class="bg-navy text-sand py-2.5 px-4 text-center text-[11px] sm:text-xs tracking-widest uppercase font-medium border-b border-warm/20 shadow-xs">
-        <span>A SOFTER KIND OF EVENING STARTS HERE</span>
+        <span id="announcement-text">A SOFTER KIND OF EVENING STARTS HERE</span>
     </div>
 
     <!-- Main Navigation Header -->
@@ -203,10 +203,10 @@
                     <svg class="w-7 h-7 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                 </button>
                 <nav class="hidden md:flex items-center space-x-6 rtl:space-x-reverse text-xs uppercase tracking-widest font-semibold">
-                    <a href="#" onclick="showHomeView(); return false;" class="text-navy hover:text-rosegold transition-colors">Home</a>
-                    <a href="#" onclick="filterCategory('pajamas'); return false;" class="text-navy hover:text-rosegold transition-colors">Pajamas</a>
-                    <a href="#" onclick="filterCategory('jumpsuit-blanket'); return false;" class="text-navy hover:text-rosegold transition-colors">Jumpsuit & Blanket</a>
-                    <a href="#" onclick="filterCategory('new-collection'); return false;" class="text-navy hover:text-rosegold transition-colors">New Collection</a>
+                    <a href="#" id="nav-home" onclick="showHomeView(); return false;" class="text-navy hover:text-rosegold transition-colors">Home</a>
+                    <a href="#" id="nav-pajamas" onclick="filterCategory('pajamas'); return false;" class="text-navy hover:text-rosegold transition-colors">Pajamas</a>
+                    <a href="#" id="nav-jumpsuit" onclick="filterCategory('jumpsuit-blanket'); return false;" class="text-navy hover:text-rosegold transition-colors">Jumpsuit & Blanket</a>
+                    <a href="#" id="nav-new" onclick="filterCategory('new-collection'); return false;" class="text-navy hover:text-rosegold transition-colors">New Collection</a>
                 </nav>
             </div>
 
@@ -235,12 +235,12 @@
 
         <!-- Mobile Menu Drawer -->
         <div id="mobile-menu" class="hidden md:hidden bg-sand-light border-b-2 border-rosegold shadow-xl px-6 py-6 space-y-4 absolute top-full left-0 right-0 z-50">
-            <a href="#" onclick="showHomeView(); toggleMobileMenu(); return false;" class="block text-sm uppercase tracking-wider text-navy font-bold py-2 border-b border-warm/30">Home</a>
+            <a href="#" id="mob-nav-home" onclick="showHomeView(); toggleMobileMenu(); return false;" class="block text-sm uppercase tracking-wider text-navy font-bold py-2 border-b border-warm/30">Home</a>
             <div class="space-y-3 pt-1">
-                <span class="text-xs uppercase tracking-widest text-rosegold font-bold block">Collections</span>
-                <a href="#" onclick="filterCategory('pajamas'); toggleMobileMenu(); return false;" class="block text-sm text-navy font-semibold ps-3 py-1.5 hover:text-rosegold">Pajamas</a>
-                <a href="#" onclick="filterCategory('jumpsuit-blanket'); toggleMobileMenu(); return false;" class="block text-sm text-navy font-semibold ps-3 py-1.5 hover:text-rosegold">Jumpsuit & Blanket</a>
-                <a href="#" onclick="filterCategory('new-collection'); toggleMobileMenu(); return false;" class="block text-sm text-navy font-semibold ps-3 py-1.5 hover:text-rosegold">New Collection</a>
+                <span id="mob-collections-label" class="text-xs uppercase tracking-widest text-rosegold font-bold block">Collections</span>
+                <a href="#" id="mob-nav-pajamas" onclick="filterCategory('pajamas'); toggleMobileMenu(); return false;" class="block text-sm text-navy font-semibold ps-3 py-1.5 hover:text-rosegold">Pajamas</a>
+                <a href="#" id="mob-nav-jumpsuit" onclick="filterCategory('jumpsuit-blanket'); toggleMobileMenu(); return false;" class="block text-sm text-navy font-semibold ps-3 py-1.5 hover:text-rosegold">Jumpsuit & Blanket</a>
+                <a href="#" id="mob-nav-new" onclick="filterCategory('new-collection'); toggleMobileMenu(); return false;" class="block text-sm text-navy font-semibold ps-3 py-1.5 hover:text-rosegold">New Collection</a>
             </div>
         </div>
     </header>
@@ -271,9 +271,9 @@
     <!-- Global Footer -->
     <footer class="bg-navy text-sand border-t border-warm/20 pt-12 pb-8 px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
-            <div class="text-center md:text-left">
+            <div class="text-center md:text-start">
                 <h3 class="font-serif text-2xl font-bold tracking-[0.2em] text-sand uppercase">DIVA HOME</h3>
-                <p class="text-xs text-sand/70 mt-1">Luxurious Sleepwear & Loungewear Collection</p>
+                <p id="footer-tagline" class="text-xs text-sand/70 mt-1">Luxurious Sleepwear & Loungewear Collection</p>
             </div>
 
             <!-- Official Social Banners -->
@@ -293,7 +293,7 @@
             </div>
         </div>
         <div class="mt-8 pt-6 border-t border-warm/10 flex flex-col sm:flex-row items-center justify-between text-xs text-sand/50 gap-4">
-            <p>&copy; 2026 Diva Home. All rights reserved.</p>
+            <p id="footer-copyright">&copy; 2026 Diva Home. All rights reserved.</p>
         </div>
     </footer>
 
@@ -301,7 +301,7 @@
     <div id="cart-drawer-backdrop" onclick="closeCartDrawer()" class="hidden fixed inset-0 bg-navy/60 backdrop-blur-xs z-50 transition-opacity"></div>
     <div id="cart-drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-sand-light shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col">
         <div class="p-4 sm:p-6 border-b border-warm/40 flex items-center justify-between bg-beige">
-            <h3 class="font-serif text-lg font-bold text-navy">Shopping Bag</h3>
+            <h3 id="cart-drawer-title" class="font-serif text-lg font-bold text-navy">Shopping Bag</h3>
             <button type="button" onclick="closeCartDrawer()" class="text-navy hover:text-rosegold text-xl font-bold cursor-pointer">&times;</button>
         </div>
         <!-- Live Promos Banner inside Cart -->
@@ -309,26 +309,26 @@
         <div id="cart-items-container" class="flex-grow overflow-y-auto p-4 sm:p-6 space-y-4"></div>
         <div class="p-4 sm:p-6 border-t border-warm/40 bg-sand space-y-2.5">
             <div class="flex justify-between text-xs text-navy/70 font-medium">
-                <span>Subtotal</span>
+                <span id="cart-subtotal-label">Subtotal</span>
                 <span id="cart-subtotal">0 EGP</span>
             </div>
             <div id="cart-discount-row" class="hidden flex justify-between text-xs text-green-700 font-bold">
-                <span>10% Bundle Discount (3+ items)</span>
+                <span id="cart-discount-label">10% Bundle Discount (3+ items)</span>
                 <span id="cart-discount">-0 EGP</span>
             </div>
             <div id="cart-gift-row" class="hidden flex justify-between text-xs text-rosegold font-bold">
-                <span>🎁 Special Page Gift (6+ items)</span>
-                <span>FREE</span>
+                <span id="cart-gift-label">🎁 Special Page Gift (6+ items)</span>
+                <span id="cart-gift-free">FREE</span>
             </div>
             <div class="flex justify-between text-xs font-semibold text-navy/80">
-                <span>Shipping</span>
+                <span id="cart-shipping-label">Shipping</span>
                 <span id="cart-shipping-status">Select governorate at checkout</span>
             </div>
             <div class="flex justify-between text-sm font-bold text-navy pt-2 border-t border-warm/40">
-                <span>Subtotal Total</span>
+                <span id="cart-total-label">Subtotal Total</span>
                 <span id="cart-final-total" class="text-rosegold">0 EGP</span>
             </div>
-            <button type="button" onclick="openCheckoutModal()" class="w-full py-3.5 bg-navy hover:bg-rosegold text-sand font-bold rounded-xl text-xs uppercase tracking-widest transition-all cursor-pointer shadow-md mt-2">
+            <button type="button" id="checkout-btn" onclick="openCheckoutModal()" class="w-full py-3.5 bg-navy hover:bg-rosegold text-sand font-bold rounded-xl text-xs uppercase tracking-widest transition-all cursor-pointer shadow-md mt-2">
                 Proceed to Checkout
             </button>
         </div>
@@ -352,30 +352,30 @@
     <div id="checkout-modal" class="hidden fixed inset-0 bg-navy/70 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-sand-light max-w-lg w-full rounded-2xl shadow-2xl border border-warm/60 overflow-hidden my-8">
             <div class="bg-navy text-sand p-4 flex justify-between items-center">
-                <h3 class="font-serif text-base font-bold">Shipping & Checkout</h3>
+                <h3 id="co-modal-title" class="font-serif text-base font-bold">Shipping & Checkout</h3>
                 <button type="button" onclick="closeCheckoutModal()" class="text-sand/70 hover:text-white text-xl font-bold cursor-pointer">&times;</button>
             </div>
             <form onsubmit="handlePlaceOrder(event)" class="p-6 space-y-3.5">
                 <div>
-                    <label class="block text-xs font-bold text-navy mb-1">Full Name (First & Last Name) *</label>
+                    <label id="co-name-label" class="block text-xs font-bold text-navy mb-1">Full Name (First & Last Name) *</label>
                     <input type="text" required id="cust-name" placeholder="e.g., Menna Mohamed" class="w-full text-xs p-2.5 rounded-lg border border-warm focus:border-rosegold focus:outline-none">
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-bold text-navy mb-1">Mobile Number *</label>
+                        <label id="co-phone-label" class="block text-xs font-bold text-navy mb-1">Mobile Number *</label>
                         <input type="tel" required id="cust-phone" placeholder="01xxxxxxxxx" class="w-full text-xs p-2.5 rounded-lg border border-warm focus:border-rosegold focus:outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-navy mb-1">Additional Phone (Optional)</label>
+                        <label id="co-alt-phone-label" class="block text-xs font-bold text-navy mb-1">Additional Phone (Optional)</label>
                         <input type="tel" id="cust-alt-phone" placeholder="01xxxxxxxxx" class="w-full text-xs p-2.5 rounded-lg border border-warm focus:border-rosegold focus:outline-none">
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-navy mb-1">WhatsApp Number (Optional)</label>
+                    <label id="co-whatsapp-label" class="block text-xs font-bold text-navy mb-1">WhatsApp Number (Optional)</label>
                     <input type="tel" id="cust-whatsapp" placeholder="01xxxxxxxxx" class="w-full text-xs p-2.5 rounded-lg border border-warm focus:border-rosegold focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-navy mb-1">Governorate / المحافظة *</label>
+                    <label id="co-gov-label" class="block text-xs font-bold text-navy mb-1">Governorate / المحافظة *</label>
                     <select required id="cust-gov" onchange="updateCartUI()" class="w-full text-xs p-2.5 rounded-lg border border-warm bg-white focus:border-rosegold focus:outline-none font-semibold text-navy">
                         <option value="" data-fee="0">-- اختر المحافظة / Select Governorate --</option>
                         <optgroup label="75 EGP Shipping">
@@ -415,28 +415,28 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-navy mb-1">Detailed Address *</label>
+                    <label id="co-address-label" class="block text-xs font-bold text-navy mb-1">Detailed Address *</label>
                     <textarea required id="cust-address" rows="2" placeholder="Area, Street, Building, Floor, Apartment..." class="w-full text-xs p-2.5 rounded-lg border border-warm focus:border-rosegold focus:outline-none"></textarea>
                 </div>
                 <div id="co-summary-box" class="bg-beige/60 p-3.5 rounded-xl border border-warm/40 space-y-1.5 text-xs">
                     <div class="flex justify-between text-navy/80">
-                        <span>Products Subtotal:</span>
+                        <span id="co-subtotal-label">Products Subtotal:</span>
                         <span id="co-subtotal">0 EGP</span>
                     </div>
                     <div id="co-discount-row" class="hidden flex justify-between text-green-700 font-bold">
-                        <span>10% Discount (3+ items):</span>
+                        <span id="co-discount-label">10% Discount (3+ items):</span>
                         <span id="co-discount">-0 EGP</span>
                     </div>
                     <div id="co-gift-row" class="hidden flex justify-between text-rosegold font-bold">
-                        <span>🎁 Free Page Gift (6+ items):</span>
-                        <span>Included</span>
+                        <span id="co-gift-label">🎁 Free Page Gift (6+ items):</span>
+                        <span id="co-gift-included">Included</span>
                     </div>
                     <div class="flex justify-between text-navy/80 font-semibold">
-                        <span>Shipping Fee:</span>
+                        <span id="co-shipping-label">Shipping Fee:</span>
                         <span id="co-shipping">Select Governorate</span>
                     </div>
                     <div class="flex justify-between text-navy font-bold text-sm pt-2 border-t border-warm/50">
-                        <span>Final Invoice Total:</span>
+                        <span id="co-total-label">Final Invoice Total:</span>
                         <span id="co-total" class="text-rosegold">0 EGP</span>
                     </div>
                 </div>
@@ -446,7 +446,7 @@
                         متاح معاينة الأوردر وقت الاستلام والاسترجاع بيكون في وجود المندوب فقط، وفي جميع الحالات يتم دفع مصاريف الشحن وفقاً لسياسة شركة الشحن.
                     </p>
                 </div>
-                <button type="submit" class="w-full py-3.5 bg-navy hover:bg-rosegold text-sand font-bold rounded-xl text-xs uppercase tracking-widest transition-all cursor-pointer shadow-md">
+                <button type="submit" id="confirm-order-btn" class="w-full py-3.5 bg-navy hover:bg-rosegold text-sand font-bold rounded-xl text-xs uppercase tracking-widest transition-all cursor-pointer shadow-md">
                     Confirm Order
                 </button>
             </form>
@@ -511,6 +511,164 @@
         window.selectedProductColors = {};
         window.cart = [];
         window.isAdminLoggedIn = false;
+        window.dynamicTranslationsCache = {};
+
+        window.translateTextSmart = async function(text, targetLang) {
+            if (!text || typeof text !== 'string' || !text.trim()) return text || '';
+            const cleanText = text.trim();
+            const hasArabic = /[\u0600-\u06FF]/.test(cleanText);
+            const hasLatin = /[A-Za-z]/.test(cleanText);
+
+            if (targetLang === 'ar' && hasArabic && !hasLatin) return cleanText;
+            if (targetLang === 'en' && hasLatin && !hasArabic) return cleanText;
+
+            const cacheKey = `${targetLang}::${cleanText}`;
+            if (window.dynamicTranslationsCache[cacheKey]) {
+                return window.dynamicTranslationsCache[cacheKey];
+            }
+
+            try {
+                const targetLanguageName = targetLang === 'ar' ? 'Arabic' : 'English';
+                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(cleanText)}`;
+                const res = await fetch(url);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data) && Array.isArray(data[0])) {
+                        const translated = data[0].map(part => part[0]).filter(Boolean).join('').trim();
+                        if (translated) {
+                            window.dynamicTranslationsCache[cacheKey] = translated;
+                            return translated;
+                        }
+                    }
+                }
+            } catch (e) {}
+
+            try {
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+                const payload = {
+                    contents: [{
+                        parts: [{
+                            text: `Translate the following e-commerce sleepwear/loungewear text into ${targetLanguageName}. Return ONLY the translated text without quotes or explanations:\n\n${cleanText}`
+                        }]
+                    }]
+                };
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                const aiText = result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+                if (aiText) {
+                    window.dynamicTranslationsCache[cacheKey] = aiText;
+                    return aiText;
+                }
+            } catch (e) {}
+
+            return cleanText;
+        };
+
+        window.getLocalizedProductFields = function(prod) {
+            const lang = window.currentLang || 'en';
+            const rawTitle = prod.title || '';
+            const rawDesc = prod.description || '';
+            const rawSize = prod.size || '';
+            const rawColors = Array.isArray(prod.colors) ? prod.colors : [];
+
+            const titleKey = `${lang}::${rawTitle.trim()}`;
+            const descKey = `${lang}::${rawDesc.trim()}`;
+            const sizeKey = `${lang}::${rawSize.trim()}`;
+
+            const localizedTitle = (rawTitle.trim() && window.dynamicTranslationsCache[titleKey])
+                ? window.dynamicTranslationsCache[titleKey]
+                : rawTitle;
+
+            const localizedDesc = (rawDesc.trim() && window.dynamicTranslationsCache[descKey])
+                ? window.dynamicTranslationsCache[descKey]
+                : rawDesc;
+
+            const localizedSize = (rawSize.trim() && window.dynamicTranslationsCache[sizeKey])
+                ? window.dynamicTranslationsCache[sizeKey]
+                : rawSize;
+
+            const localizedColors = rawColors.map(c => {
+                const cKey = `${lang}::${String(c).trim()}`;
+                return window.dynamicTranslationsCache[cKey] || c;
+            });
+
+            return {
+                title: localizedTitle,
+                description: localizedDesc,
+                size: localizedSize,
+                colors: localizedColors
+            };
+        };
+
+        window.translateVisibleProducts = async function() {
+            const lang = window.currentLang || 'en';
+            let targetProducts = window.products || [];
+            if (window.currentView === 'category') {
+                targetProducts = targetProducts.filter(p => p.category === window.currentCategory);
+            } else if (window.currentView === 'product' && window.currentProductId) {
+                targetProducts = targetProducts.filter(p => p.id === window.currentProductId);
+            } else if (window.currentView !== 'home') {
+                return;
+            }
+
+            if (targetProducts.length === 0) return;
+
+            let updatedAny = false;
+            await Promise.all(targetProducts.map(async (prod) => {
+                const tasks = [];
+                if (prod.title && prod.title.trim()) {
+                    const tKey = `${lang}::${prod.title.trim()}`;
+                    if (!window.dynamicTranslationsCache[tKey]) {
+                        tasks.push(translateTextSmart(prod.title, lang).then(res => {
+                            if (res && res !== prod.title) updatedAny = true;
+                        }));
+                    }
+                }
+                if (prod.description && prod.description.trim()) {
+                    const dKey = `${lang}::${prod.description.trim()}`;
+                    if (!window.dynamicTranslationsCache[dKey]) {
+                        tasks.push(translateTextSmart(prod.description, lang).then(res => {
+                            if (res && res !== prod.description) updatedAny = true;
+                        }));
+                    }
+                }
+                if (prod.size && prod.size.trim()) {
+                    const sKey = `${lang}::${prod.size.trim()}`;
+                    if (!window.dynamicTranslationsCache[sKey]) {
+                        tasks.push(translateTextSmart(prod.size, lang).then(res => {
+                            if (res && res !== prod.size) updatedAny = true;
+                        }));
+                    }
+                }
+                if (Array.isArray(prod.colors)) {
+                    prod.colors.forEach(col => {
+                        if (col && String(col).trim()) {
+                            const cKey = `${lang}::${String(col).trim()}`;
+                            if (!window.dynamicTranslationsCache[cKey]) {
+                                tasks.push(translateTextSmart(String(col), lang).then(res => {
+                                    if (res && res !== col) updatedAny = true;
+                                }));
+                            }
+                        }
+                    });
+                }
+                await Promise.all(tasks);
+            }));
+
+            if (updatedAny) {
+                updateCartUI();
+                if (window.currentView === 'category') {
+                    renderProductsGridInternal(false);
+                } else if (window.currentView === 'product' && window.currentProductId) {
+                    renderProductDetailInternal(window.currentProductId, false);
+                }
+            }
+        };
 
         function scrollToPageTop() {
             window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
@@ -612,6 +770,56 @@
 
         const i18n = {
             en: {
+                announcement: "A SOFTER KIND OF EVENING STARTS HERE",
+                navHome: "Home",
+                navPajamas: "Pajamas",
+                navJumpsuit: "Jumpsuit & Blanket",
+                navNew: "New Collection",
+                collectionsLabel: "Collections",
+                footerTagline: "Luxurious Sleepwear & Loungewear Collection",
+                footerCopyright: "© 2026 Diva Home. All rights reserved.",
+                cartTitle: "Shopping Bag",
+                subtotalLabel: "Subtotal",
+                discountLabel: "10% Bundle Discount (3+ items)",
+                giftLabel: "🎁 Special Page Gift (6+ items)",
+                freeWord: "FREE",
+                includedWord: "Included",
+                shippingLabel: "Shipping",
+                selectGovAtCheckout: "Select governorate at checkout",
+                selectGovAbove: "Select Governorate above",
+                freeShippingWord: "FREE 🎉",
+                freeShippingBanner: "FREE Shipping 🎉 (0 EGP)",
+                subtotalTotalLabel: "Subtotal Total",
+                proceedCheckout: "Proceed to Checkout",
+                coTitle: "Shipping & Checkout",
+                coNameLabel: "Full Name (First & Last Name) *",
+                coNamePlaceholder: "e.g., Menna Mohamed",
+                coPhoneLabel: "Mobile Number *",
+                coAltPhoneLabel: "Additional Phone (Optional)",
+                coWhatsappLabel: "WhatsApp Number (Optional)",
+                coGovLabel: "Governorate *",
+                coGovPlaceholder: "-- Select Governorate --",
+                coAddressLabel: "Detailed Address *",
+                coAddressPlaceholder: "Area, Street, Building, Floor, Apartment...",
+                coSubtotalLabel: "Products Subtotal:",
+                coDiscountLabel: "10% Discount (3+ items):",
+                coGiftLabel: "🎁 Free Page Gift (6+ items):",
+                coShippingLabel: "Shipping Fee:",
+                coTotalLabel: "Final Invoice Total:",
+                confirmOrderBtn: "Confirm Order",
+                promoAddMoreForDiscount: (n) => `✨ Add <strong>${n}</strong> more item(s) to unlock <strong>10% OFF</strong>!`,
+                promoDiscountUnlocked: `✅ <strong>10% Bundle Discount</strong> unlocked!`,
+                promoAddMoreForGift: (n) => `🎁 Add <strong>${n}</strong> more item(s) for a <strong>Free Gift</strong> from our page!`,
+                promoGiftUnlocked: `🎉 <strong>Free Gift</strong> from our page unlocked!`,
+                promoAddMoreForShipping: (amt) => `🚚 Spend <strong>${amt} EGP</strong> more for <strong>Free Shipping</strong>!`,
+                promoShippingUnlocked: `🚚 <strong>Free Shipping</strong> unlocked!`,
+                floatingNeedMoreForDiscount: (n) => `${n} more for 10% OFF`,
+                catPajamasTitle: "Pajamas",
+                catJumpsuitTitle: "Jumpsuit & Blanket",
+                catNewTitle: "New Collection",
+                explorePajamas: "Explore Pajamas →",
+                exploreJumpsuits: "Explore Jumpsuits →",
+                shopNewCollection: "Shop New Collection →",
                 heroHeadline: "Make evenings feel a little softer.",
                 heroSubtext: "Meet Diva Home: sleepwear for winding down, slowing the day, and making room for a little comfort in your everyday ritual.",
                 pajamaDesc: "All-season soft sleepwear sets designed for your everyday comfort ritual.",
@@ -635,6 +843,8 @@
                 selectColorLabel: "Select Color:",
                 availableColorsLabel: "Available Colors:",
                 colorWord: "Color",
+                sizeWord: "Size",
+                colorsCountLabel: (n) => `${n} Colors`,
                 feelingTitle: "THE DIVA HOME FEELING",
                 feelingSubtitle: "A softer routine, your way. Start with what sounds good tonight. We can help you find the rest.",
                 step1Num: "01",
@@ -648,6 +858,56 @@
                 step3Desc: "Explore current offers and make a little room for comfort at home."
             },
             ar: {
+                announcement: "أمسية أكثر نعومة وراحة تبدأ من هنا",
+                navHome: "الرئيسية",
+                navPajamas: "بيجامات",
+                navJumpsuit: "جامبسوت وبلانكيت",
+                navNew: "كولكشن جديد",
+                collectionsLabel: "التقسيمات",
+                footerTagline: "تشكيلة فاخرة من ملابس النوم والراحة المنزلية",
+                footerCopyright: "© 2026 Diva Home. جميع الحقوق محفوظة.",
+                cartTitle: "حقيبة التسوق",
+                subtotalLabel: "مجموع المنتجات",
+                discountLabel: "خصم 10% للباقات (3 قطع فأكثر)",
+                giftLabel: "🎁 هدية مميزة من الصفحة (6 قطع فأكثر)",
+                freeWord: "مجاني",
+                includedWord: "مشمولة",
+                shippingLabel: "الشحن",
+                selectGovAtCheckout: "اختاري المحافظة عند إتمام الطلب",
+                selectGovAbove: "اختاري المحافظة بالأعلى",
+                freeShippingWord: "شحن مجاني 🎉",
+                freeShippingBanner: "شحن مجاني 🎉 (0 جنيه)",
+                subtotalTotalLabel: "إجمالي المنتجات",
+                proceedCheckout: "إتمام الطلب",
+                coTitle: "بيانات الشحن وإتمام الطلب",
+                coNameLabel: "الاسم بالكامل (الاسم الأول واسم العائلة) *",
+                coNamePlaceholder: "مثال: منة محمد",
+                coPhoneLabel: "رقم الموبايل *",
+                coAltPhoneLabel: "رقم إضافي (اختياري)",
+                coWhatsappLabel: "رقم واتساب (اختياري)",
+                coGovLabel: "المحافظة *",
+                coGovPlaceholder: "-- اختاري المحافظة --",
+                coAddressLabel: "العنوان بالتفصيل *",
+                coAddressPlaceholder: "المنطقة، الشارع، رقم العقار، الدور، الشقة...",
+                coSubtotalLabel: "إجمالي المنتجات:",
+                coDiscountLabel: "خصم 10% (3 قطع فأكثر):",
+                coGiftLabel: "🎁 هدية مجانية من الصفحة (6 قطع فأكثر):",
+                coShippingLabel: "مصاريف الشحن:",
+                coTotalLabel: "الإجمالي النهائي للفاتورة:",
+                confirmOrderBtn: "تأكيد الأوردر",
+                promoAddMoreForDiscount: (n) => `✨ أضيفي <strong>${n}</strong> قطعة إضافية للحصول على <strong>خصم 10%</strong>!`,
+                promoDiscountUnlocked: `✅ تم تفعيل <strong>خصم 10%</strong> على طلبك!`,
+                promoAddMoreForGift: (n) => `🎁 أضيفي <strong>${n}</strong> قطعة إضافية للحصول على <strong>هدية مجانية</strong> من صفحتنا!`,
+                promoGiftUnlocked: `🎉 تم تفعيل <strong>الهدية المجانية</strong> من صفحتنا!`,
+                promoAddMoreForShipping: (amt) => `🚚 زودي مشترياتك بـ <strong>${amt} جنيه</strong> للحصول على <strong>شحن مجاني</strong>!`,
+                promoShippingUnlocked: `🚚 تم تفعيل <strong>الشحن المجاني</strong>!`,
+                floatingNeedMoreForDiscount: (n) => `باقي ${n} لخصم 10%`,
+                catPajamasTitle: "بيجامات",
+                catJumpsuitTitle: "جامبسوت وبلانكيت",
+                catNewTitle: "كولكشن جديد",
+                explorePajamas: "تصفحي البيجامات ←",
+                exploreJumpsuits: "تصفحي الجامبسوت ←",
+                shopNewCollection: "تسوقي الكولكشن الجديد ←",
                 heroHeadline: "اجعلي أمسياتكِ أكثر نعومة وراحة.",
                 heroSubtext: "اكتشفي ديفا هوم: ملابس نوم مصممة للاسترخاء وإعادة الهدوء ليومكِ وتوفير الراحة المثالية لروتينكِ اليومي.",
                 pajamaDesc: "تشكيلة ملابس نوم مريحة وناعمة تناسب جميع فصول السنة.",
@@ -671,6 +931,8 @@
                 selectColorLabel: "اختاري اللون:",
                 availableColorsLabel: "الألوان المتاحة:",
                 colorWord: "اللون",
+                sizeWord: "المقاس",
+                colorsCountLabel: (n) => `${n} ألوان`,
                 feelingTitle: "إحساس ديفا هوم",
                 feelingSubtitle: "روتين أهدأ وأكثر نعومة على طريقتكِ. ابدئي بما يناسب ليلتكِ، وسنساعدكِ في إيجاد الراحة التي تبحثين عنها.",
                 step1Num: "01",
@@ -683,6 +945,55 @@
                 step3Title: "اجعليها لحظة مميزة",
                 step3Desc: "اكتشفي العروض الحالية ووفّري مساحة صغيرة للراحة في منزلكِ."
             }
+        };
+
+        window.applyStaticTranslations = function() {
+            const t = i18n[window.currentLang] || i18n.en;
+            const setText = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.innerText = val;
+            };
+            setText('announcement-text', t.announcement);
+            setText('nav-home', t.navHome);
+            setText('nav-pajamas', t.navPajamas);
+            setText('nav-jumpsuit', t.navJumpsuit);
+            setText('nav-new', t.navNew);
+            setText('mob-nav-home', t.navHome);
+            setText('mob-collections-label', t.collectionsLabel);
+            setText('mob-nav-pajamas', t.navPajamas);
+            setText('mob-nav-jumpsuit', t.navJumpsuit);
+            setText('mob-nav-new', t.navNew);
+            setText('footer-tagline', t.footerTagline);
+            setText('footer-copyright', t.footerCopyright);
+            setText('cart-drawer-title', t.cartTitle);
+            setText('cart-subtotal-label', t.subtotalLabel);
+            setText('cart-discount-label', t.discountLabel);
+            setText('cart-gift-label', t.giftLabel);
+            setText('cart-gift-free', t.freeWord);
+            setText('cart-shipping-label', t.shippingLabel);
+            setText('cart-total-label', t.subtotalTotalLabel);
+            setText('checkout-btn', t.proceedCheckout);
+            setText('co-modal-title', t.coTitle);
+            setText('co-name-label', t.coNameLabel);
+            setText('co-phone-label', t.coPhoneLabel);
+            setText('co-alt-phone-label', t.coAltPhoneLabel);
+            setText('co-whatsapp-label', t.coWhatsappLabel);
+            setText('co-gov-label', t.coGovLabel);
+            setText('co-address-label', t.coAddressLabel);
+            setText('co-subtotal-label', t.coSubtotalLabel);
+            setText('co-discount-label', t.coDiscountLabel);
+            setText('co-gift-label', t.coGiftLabel);
+            setText('co-gift-included', t.includedWord);
+            setText('co-shipping-label', t.coShippingLabel);
+            setText('co-total-label', t.coTotalLabel);
+            setText('confirm-order-btn', t.confirmOrderBtn);
+
+            const nameInput = document.getElementById('cust-name');
+            if (nameInput) nameInput.placeholder = t.coNamePlaceholder;
+            const addrInput = document.getElementById('cust-address');
+            if (addrInput) addrInput.placeholder = t.coAddressPlaceholder;
+            const govSelect = document.getElementById('cust-gov');
+            if (govSelect && govSelect.options[0]) govSelect.options[0].text = t.coGovPlaceholder;
         };
 
         window.getSelectedColorForProduct = function(item) {
@@ -709,16 +1020,19 @@
 
         window.renderProductCardControls = function(item) {
             const isSoldOut = Boolean(item.soldOut);
-            const colors = Array.isArray(item.colors) ? item.colors : [];
+            const rawColors = Array.isArray(item.colors) ? item.colors : [];
+            const localizedFields = getLocalizedProductFields(item);
             const activeColor = getSelectedColorForProduct(item);
+            const activeColorLocalized = localizedFields.colors[rawColors.indexOf(activeColor)] || activeColor;
 
-            const colorPillsHTML = colors.length > 0 ? `
+            const colorPillsHTML = rawColors.length > 0 ? `
                 <div onclick="event.stopPropagation()" class="space-y-1">
                     <span class="text-[10px] font-bold text-navy/65 block">${i18n[window.currentLang].selectColorLabel}</span>
                     <div class="flex flex-wrap gap-1.5">
-                        ${colors.map(c => {
+                        ${rawColors.map((c, idx) => {
                             const isSelected = c === activeColor;
-                            return `<button type="button" onclick="selectProductColor('${item.id}', '${c.replace(/'/g, "\\'")}')" class="px-2 py-0.5 rounded-md text-[10px] font-bold border transition-all cursor-pointer ${isSelected ? 'bg-rosegold text-white border-rosegold shadow-2xs' : 'bg-sand text-navy border-warm hover:border-rosegold'}">${c}</button>`;
+                            const displayColor = localizedFields.colors[idx] || c;
+                            return `<button type="button" onclick="selectProductColor('${item.id}', '${c.replace(/'/g, "\\'")}')" class="px-2 py-0.5 rounded-md text-[10px] font-bold border transition-all cursor-pointer ${isSelected ? 'bg-rosegold text-white border-rosegold shadow-2xs' : 'bg-sand text-navy border-warm hover:border-rosegold'}">${displayColor}</button>`;
                         }).join('')}
                     </div>
                 </div>
@@ -738,7 +1052,7 @@
                 return `
                     ${colorPillsHTML}
                     <button type="button" onclick="event.stopPropagation(); addProductToCartById('${item.id}', '${activeColor.replace(/'/g, "\\'")}')" class="w-full py-2.5 rounded-xl bg-navy hover:bg-rosegold text-sand text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-xs">
-                        ${i18n[window.currentLang].addToBag}
+                        ${i18n[window.currentLang].addToBag} ${activeColorLocalized ? `(${activeColorLocalized})` : ''}
                     </button>
                 `;
             }
@@ -765,9 +1079,8 @@
 
         function renderHomeViewInternal() {
             window.currentView = 'home';
-            window.currentCategory = 'all';
-            window.currentSizeFilter = 'all';
             scrollToPageTop();
+            applyStaticTranslations();
             updateCartUI();
 
             const appContainer = document.getElementById('app-view');
@@ -796,32 +1109,32 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div onclick="filterCategory('pajamas')" class="group cursor-pointer bg-sand-light rounded-2xl overflow-hidden shadow-xs hover:shadow-xl transition-all border border-warm/50 flex flex-col">
                             <div class="w-full bg-sand/80 flex items-center justify-center p-4 min-h-[260px]">
-                                ${renderCoverBox(window.categoryCovers['pajamas'], 'Pajamas')}
+                                ${renderCoverBox(window.categoryCovers['pajamas'], i18n[window.currentLang].catPajamasTitle)}
                             </div>
                             <div class="p-6 flex-grow flex flex-col justify-between border-t border-warm/20">
-                                <h3 class="font-serif text-xl font-bold text-navy mb-2">Pajamas</h3>
+                                <h3 class="font-serif text-xl font-bold text-navy mb-2">${i18n[window.currentLang].catPajamasTitle}</h3>
                                 <p class="text-xs text-navy/70 leading-relaxed mb-4">${i18n[window.currentLang].pajamaDesc}</p>
-                                <span class="text-xs font-bold text-rosegold uppercase tracking-widest">Explore Pajamas &rarr;</span>
+                                <span class="text-xs font-bold text-rosegold uppercase tracking-widest">${i18n[window.currentLang].explorePajamas}</span>
                             </div>
                         </div>
                         <div onclick="filterCategory('jumpsuit-blanket')" class="group cursor-pointer bg-sand-light rounded-2xl overflow-hidden shadow-xs hover:shadow-xl transition-all border border-warm/50 flex flex-col">
                             <div class="w-full bg-sand/80 flex items-center justify-center p-4 min-h-[260px]">
-                                ${renderCoverBox(window.categoryCovers['jumpsuit-blanket'], 'Jumpsuit & Blanket')}
+                                ${renderCoverBox(window.categoryCovers['jumpsuit-blanket'], i18n[window.currentLang].catJumpsuitTitle)}
                             </div>
                             <div class="p-6 flex-grow flex flex-col justify-between border-t border-warm/20">
-                                <h3 class="font-serif text-xl font-bold text-navy mb-2">Jumpsuit & Blanket</h3>
+                                <h3 class="font-serif text-xl font-bold text-navy mb-2">${i18n[window.currentLang].catJumpsuitTitle}</h3>
                                 <p class="text-xs text-navy/70 leading-relaxed mb-4">${i18n[window.currentLang].jumpsuitDesc}</p>
-                                <span class="text-xs font-bold text-rosegold uppercase tracking-widest">Explore Jumpsuits &rarr;</span>
+                                <span class="text-xs font-bold text-rosegold uppercase tracking-widest">${i18n[window.currentLang].exploreJumpsuits}</span>
                             </div>
                         </div>
                         <div onclick="filterCategory('new-collection')" class="group cursor-pointer bg-sand-light rounded-2xl overflow-hidden shadow-xs hover:shadow-xl transition-all border border-warm/50 flex flex-col">
                             <div class="w-full bg-sand/80 flex items-center justify-center p-4 min-h-[260px]">
-                                ${renderCoverBox(window.categoryCovers['new-collection'], 'New Collection')}
+                                ${renderCoverBox(window.categoryCovers['new-collection'], i18n[window.currentLang].catNewTitle)}
                             </div>
                             <div class="p-6 flex-grow flex flex-col justify-between border-t border-warm/20">
-                                <h3 class="font-serif text-xl font-bold text-navy mb-2">New Collection</h3>
+                                <h3 class="font-serif text-xl font-bold text-navy mb-2">${i18n[window.currentLang].catNewTitle}</h3>
                                 <p class="text-xs text-navy/70 leading-relaxed mb-4">${i18n[window.currentLang].newDesc}</p>
-                                <span class="text-xs font-bold text-rosegold uppercase tracking-widest">Shop New Collection &rarr;</span>
+                                <span class="text-xs font-bold text-rosegold uppercase tracking-widest">${i18n[window.currentLang].shopNewCollection}</span>
                             </div>
                         </div>
                     </div>
@@ -889,6 +1202,7 @@
         function renderProductsGridInternal() {
             window.currentView = 'category';
             scrollToPageTop();
+            applyStaticTranslations();
             updateCartUI();
 
             const appContainer = document.getElementById('app-view');
@@ -928,17 +1242,31 @@
                 }
             }
 
-            let categoryTitle = window.currentCategory.replace('-', ' ').toUpperCase();
+            let categoryTitle = window.currentCategory === 'pajamas'
+                ? i18n[window.currentLang].catPajamasTitle
+                : window.currentCategory === 'jumpsuit-blanket'
+                    ? i18n[window.currentLang].catJumpsuitTitle
+                    : window.currentCategory === 'new-collection'
+                        ? i18n[window.currentLang].catNewTitle
+                        : window.currentCategory.replace('-', ' ').toUpperCase();
 
             let gridCards = filtered.map(item => {
                 const imgList = (item.images && item.images.length > 0) ? item.images : [item.img || 'https://placehold.co/400x500/F7EFEF/131B2A?text=Diva'];
                 const hasMultiple = imgList.length > 1;
-                const colorsCount = (item.colors && item.colors.length > 1) ? `${item.colors.length} Colors` : '';
+                const colorsCount = (item.colors && item.colors.length > 1) ? i18n[window.currentLang].colorsCountLabel(item.colors.length) : '';
                 const isSoldOut = Boolean(item.soldOut);
+                const loc = getLocalizedProductFields(item);
+                const catLabel = item.category === 'pajamas'
+                    ? i18n[window.currentLang].catPajamasTitle
+                    : item.category === 'jumpsuit-blanket'
+                        ? i18n[window.currentLang].catJumpsuitTitle
+                        : item.category === 'new-collection'
+                            ? i18n[window.currentLang].catNewTitle
+                            : item.category;
 
                 const slidesHTML = imgList.map((src, idx) => `
                     <div class="w-full shrink-0 snap-center">
-                        <img src="${src}" onerror="this.src='https://placehold.co/400x500/F7EFEF/131B2A?text=Diva+Home'" alt="${item.title} ${idx + 1}" class="w-full h-48 sm:h-72 lg:h-80 object-cover block pointer-events-none ${isSoldOut ? 'grayscale-[40%]' : ''}">
+                        <img src="${src}" onerror="this.src='https://placehold.co/400x500/F7EFEF/131B2A?text=Diva+Home'" alt="${loc.title} ${idx + 1}" class="w-full h-48 sm:h-72 lg:h-80 object-cover block pointer-events-none ${isSoldOut ? 'grayscale-[40%]' : ''}">
                     </div>
                 `).join('');
 
@@ -962,8 +1290,8 @@
                         </div>
                         <div class="p-2.5 sm:p-4 flex-grow flex flex-col justify-between space-y-2 sm:space-y-3">
                             <div>
-                                <span class="text-[9px] sm:text-[10px] uppercase font-bold text-rosegold line-clamp-1">${item.category} ${item.size ? '| ' + item.size : ''}</span>
-                                <h3 class="font-bold text-xs sm:text-sm text-navy mt-0.5 line-clamp-2 leading-snug">${item.title}</h3>
+                                <span class="text-[9px] sm:text-[10px] uppercase font-bold text-rosegold line-clamp-1">${catLabel} ${loc.size ? '| ' + i18n[window.currentLang].sizeWord + ': ' + loc.size : ''}</span>
+                                <h3 class="font-bold text-xs sm:text-sm text-navy mt-0.5 line-clamp-2 leading-snug">${loc.title}</h3>
                             </div>
                             <div class="space-y-2 pt-1.5 border-t border-warm/30">
                                 <div class="flex items-center justify-between gap-1">
@@ -995,6 +1323,7 @@
                     </div>
                 </section>
             `;
+            translateVisibleProducts();
         }
 
         window.openProductPage = function(id) {
@@ -1006,9 +1335,10 @@
             renderProductDetailInternal(id);
         };
 
-        function renderProductDetailInternal(id) {
+        function renderProductDetailInternal(id, shouldScroll = true) {
             window.currentView = 'product';
-            scrollToPageTop();
+            if (shouldScroll) scrollToPageTop();
+            applyStaticTranslations();
             updateCartUI();
 
             const prod = window.products.find(p => p.id === id);
@@ -1021,10 +1351,19 @@
 
             const imgList = (prod.images && prod.images.length > 0) ? prod.images : [prod.img || 'https://placehold.co/400x500/F7EFEF/131B2A?text=Diva'];
             const hasMultiple = imgList.length > 1;
-            const colorsList = Array.isArray(prod.colors) ? prod.colors : [];
+            const rawColors = Array.isArray(prod.colors) ? prod.colors : [];
+            const loc = getLocalizedProductFields(prod);
             const activeColor = getSelectedColorForProduct(prod);
+            const activeColorLocalized = loc.colors[rawColors.indexOf(activeColor)] || activeColor;
             const activeColorCount = getProductCartCount(prod.id, activeColor);
             const isSoldOut = Boolean(prod.soldOut);
+            const catLabel = prod.category === 'pajamas'
+                ? i18n[window.currentLang].catPajamasTitle
+                : prod.category === 'jumpsuit-blanket'
+                    ? i18n[window.currentLang].catJumpsuitTitle
+                    : prod.category === 'new-collection'
+                        ? i18n[window.currentLang].catNewTitle
+                        : prod.category.replace('-', ' ');
 
             let sizeNoteText = '';
             if (prod.size === 'M') sizeNoteText = i18n[window.currentLang].sizeNoteM;
@@ -1032,7 +1371,7 @@
 
             const detailSlidesHTML = imgList.map((im, idx) => `
                 <div class="w-full shrink-0 snap-center flex items-center justify-center bg-sand">
-                    <img src="${im}" onerror="this.src='https://placehold.co/400x500/F7EFEF/131B2A?text=Diva+Home'" alt="${prod.title} ${idx + 1}" class="w-full h-[42vh] sm:h-[48vh] object-contain mx-auto block pointer-events-none ${isSoldOut ? 'grayscale-[40%]' : ''}">
+                    <img src="${im}" onerror="this.src='https://placehold.co/400x500/F7EFEF/131B2A?text=Diva+Home'" alt="${loc.title} ${idx + 1}" class="w-full h-[42vh] sm:h-[48vh] object-contain mx-auto block pointer-events-none ${isSoldOut ? 'grayscale-[40%]' : ''}">
                 </div>
             `).join('');
 
@@ -1044,8 +1383,8 @@
                 </div>
             ` : '';
 
-            const descriptionContent = prod.description && prod.description.trim().length > 0
-                ? prod.description.replace(/\n/g, '<br>')
+            const descriptionContent = loc.description && loc.description.trim().length > 0
+                ? loc.description.replace(/\n/g, '<br>')
                 : i18n[window.currentLang].noDescription;
 
             appContainer.innerHTML = `
@@ -1055,7 +1394,7 @@
                             <span>&larr;</span>
                             <span>${i18n[window.currentLang].backBtn}</span>
                         </button>
-                        <span class="text-[11px] uppercase font-bold tracking-widest text-rosegold">${prod.category.replace('-', ' ')}</span>
+                        <span class="text-[11px] uppercase font-bold tracking-widest text-rosegold">${catLabel}</span>
                     </div>
 
                     <div class="bg-sand-light rounded-3xl border border-warm/60 shadow-md overflow-hidden">
@@ -1069,19 +1408,20 @@
 
                         <div class="p-4 sm:p-6 space-y-4">
                             <div class="border-b border-warm/40 pb-4 space-y-1.5">
-                                <h1 class="font-serif text-xl sm:text-2xl font-bold text-navy">${prod.title}</h1>
+                                <h1 class="font-serif text-xl sm:text-2xl font-bold text-navy">${loc.title}</h1>
                                 <div class="flex flex-wrap items-center justify-between gap-2 pt-0.5">
                                     <p class="text-lg sm:text-xl font-bold text-rosegold">${prod.price} EGP</p>
-                                    ${prod.size ? `<span class="text-xs font-bold bg-beige text-navy px-3 py-1 rounded-xl border border-warm/50">Size: ${prod.size}</span>` : ''}
+                                    ${loc.size ? `<span class="text-xs font-bold bg-beige text-navy px-3 py-1 rounded-xl border border-warm/50">${i18n[window.currentLang].sizeWord}: ${loc.size}</span>` : ''}
                                 </div>
                                 ${sizeNoteText ? `<p class="text-xs text-navy/75 font-semibold pt-1">${sizeNoteText}</p>` : ''}
-                                ${colorsList.length > 0 ? `
+                                ${rawColors.length > 0 ? `
                                     <div class="pt-3 space-y-2">
-                                        <span class="text-xs font-bold text-navy block">${i18n[window.currentLang].selectColorLabel} <span class="text-rosegold">${activeColor}</span></span>
+                                        <span class="text-xs font-bold text-navy block">${i18n[window.currentLang].selectColorLabel} <span class="text-rosegold">${activeColorLocalized}</span></span>
                                         <div class="flex flex-wrap gap-2">
-                                            ${colorsList.map(c => {
+                                            ${rawColors.map((c, idx) => {
                                                 const isSelected = c === activeColor;
-                                                return `<button type="button" onclick="selectProductColor('${prod.id}', '${c.replace(/'/g, "\\'")}')" class="px-3.5 py-2 rounded-xl text-xs font-bold border-2 transition-all cursor-pointer ${isSelected ? 'bg-rosegold text-white border-rosegold shadow-sm' : 'bg-sand text-navy border-warm hover:border-rosegold'}">${c}</button>`;
+                                                const displayColor = loc.colors[idx] || c;
+                                                return `<button type="button" onclick="selectProductColor('${prod.id}', '${c.replace(/'/g, "\\'")}')" class="px-3.5 py-2 rounded-xl text-xs font-bold border-2 transition-all cursor-pointer ${isSelected ? 'bg-rosegold text-white border-rosegold shadow-sm' : 'bg-sand text-navy border-warm hover:border-rosegold'}">${displayColor}</button>`;
                                             }).join('')}
                                         </div>
                                     </div>
@@ -1100,7 +1440,7 @@
                                         <div class="space-y-3">
                                             ${activeColorCount > 0 ? `
                                                 <div class="flex items-center justify-between bg-beige border border-rosegold/40 rounded-2xl px-4 py-3">
-                                                    <span class="text-xs font-bold text-rosegold">${i18n[window.currentLang].selectedCountLabel(activeColorCount)} ${activeColor ? `(${activeColor})` : ''}</span>
+                                                    <span class="text-xs font-bold text-rosegold">${i18n[window.currentLang].selectedCountLabel(activeColorCount)} ${activeColorLocalized ? `(${activeColorLocalized})` : ''}</span>
                                                     <div class="flex items-center gap-3">
                                                         <button type="button" onclick="removeOneProductById('${prod.id}', '${activeColor.replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-xl bg-sand-light border border-warm text-navy hover:bg-rosegold hover:text-white font-bold text-sm flex items-center justify-center cursor-pointer transition-colors">-</button>
                                                         <span class="text-sm font-bold text-navy min-w-[20px] text-center">${activeColorCount}</span>
@@ -1108,7 +1448,7 @@
                                                     </div>
                                                 </div>
                                             ` : ''}
-                                            <button type="button" onclick="addProductToCartById('${prod.id}', '${activeColor.replace(/'/g, "\\'")}')" class="w-full py-4 bg-navy hover:bg-rosegold text-sand font-bold rounded-2xl text-xs sm:text-sm uppercase tracking-widest transition-all cursor-pointer shadow-lg">${i18n[window.currentLang].addToBag} ${activeColor ? `(${activeColor})` : ''}</button>
+                                            <button type="button" onclick="addProductToCartById('${prod.id}', '${activeColor.replace(/'/g, "\\'")}')" class="w-full py-4 bg-navy hover:bg-rosegold text-sand font-bold rounded-2xl text-xs sm:text-sm uppercase tracking-widest transition-all cursor-pointer shadow-lg">${i18n[window.currentLang].addToBag} ${activeColorLocalized ? `(${activeColorLocalized})` : ''}</button>
                                         </div>
                                     `
                                 }
@@ -1117,6 +1457,7 @@
                     </div>
                 </section>
             `;
+            translateVisibleProducts();
         }
 
         window.addProductToCartById = function(id, color = null) {
@@ -1640,6 +1981,7 @@
 
         window.updateCartUI = function() {
             const stats = calculateCartTotals();
+            const t = i18n[window.currentLang] || i18n.en;
             document.getElementById('cart-badge').innerText = stats.count;
             document.getElementById('cart-badge').style.opacity = stats.count > 0 ? '1' : '0';
 
@@ -1649,13 +1991,13 @@
                 floatingBar.classList.remove('hidden');
                 document.getElementById('floating-cart-count').innerText = stats.count;
                 document.getElementById('floating-cart-total').innerText = stats.productsNetTotal + ' EGP';
-                document.getElementById('floating-cart-label').innerText = i18n[window.currentLang].viewBasket;
+                document.getElementById('floating-cart-label').innerText = t.viewBasket;
                 
                 let promoHints = [];
                 if (stats.hasDiscount) promoHints.push('10% OFF');
-                if (stats.hasGift) promoHints.push('+ Free Gift 🎁');
-                if (stats.freeShipping) promoHints.push('+ Free Shipping 🚚');
-                document.getElementById('floating-cart-promo').innerText = promoHints.length > 0 ? promoHints.join(' ') : `${3 - stats.count} more for 10% OFF`;
+                if (stats.hasGift) promoHints.push('+ 🎁');
+                if (stats.freeShipping) promoHints.push('+ 🚚');
+                document.getElementById('floating-cart-promo').innerText = promoHints.length > 0 ? promoHints.join(' ') : t.floatingNeedMoreForDiscount(3 - stats.count);
             } else {
                 floatingBar.classList.add('hidden');
             }
@@ -1664,19 +2006,19 @@
             const promosBanner = document.getElementById('cart-promos-banner');
             let bannerLines = [];
             if (stats.count < 3) {
-                bannerLines.push(`✨ Add <strong>${3 - stats.count}</strong> more item(s) to unlock <strong>10% OFF</strong>!`);
+                bannerLines.push(t.promoAddMoreForDiscount(3 - stats.count));
             } else {
-                bannerLines.push(`✅ <strong>10% Bundle Discount</strong> unlocked!`);
+                bannerLines.push(t.promoDiscountUnlocked);
             }
             if (stats.count <= 5) {
-                bannerLines.push(`🎁 Add <strong>${6 - stats.count}</strong> more item(s) for a <strong>Free Gift</strong> from our page!`);
+                bannerLines.push(t.promoAddMoreForGift(6 - stats.count));
             } else {
-                bannerLines.push(`🎉 <strong>Free Gift</strong> from our page unlocked!`);
+                bannerLines.push(t.promoGiftUnlocked);
             }
             if (!stats.freeShipping) {
-                bannerLines.push(`🚚 Spend <strong>${1500 - stats.productsNetTotal} EGP</strong> more for <strong>Free Shipping</strong>!`);
+                bannerLines.push(t.promoAddMoreForShipping(1500 - stats.productsNetTotal));
             } else {
-                bannerLines.push(`🚚 <strong>Free Shipping</strong> unlocked!`);
+                bannerLines.push(t.promoShippingUnlocked);
             }
             promosBanner.innerHTML = bannerLines.map(l => `<p>${l}</p>`).join('');
 
@@ -1694,16 +2036,21 @@
 
             container.innerHTML = groupedCart.map((group) => {
                 const safeColor = (group.selectedColor || '').replace(/'/g, "\\'");
+                const loc = getLocalizedProductFields(group);
+                const rawColors = Array.isArray(group.colors) ? group.colors : [];
+                const displayColor = group.selectedColor
+                    ? (loc.colors[rawColors.indexOf(group.selectedColor)] || group.selectedColor)
+                    : '';
                 return `
                     <div class="flex items-center justify-between gap-2 border-b border-warm/40 pb-3">
                         <div class="flex items-center gap-2.5 min-w-0">
                             <img src="${group.img}" class="w-11 h-11 object-cover rounded-lg pointer-events-none shrink-0">
                             <div class="min-w-0">
                                 <div class="flex items-center gap-1.5 flex-wrap">
-                                    <span class="text-xs font-bold text-navy truncate">${group.title}</span>
-                                    <span class="bg-rosegold text-white text-[10px] px-2 py-0.5 rounded-full font-bold">${i18n[window.currentLang].qtyBadgeLabel(group.qty)}</span>
+                                    <span class="text-xs font-bold text-navy truncate">${loc.title}</span>
+                                    <span class="bg-rosegold text-white text-[10px] px-2 py-0.5 rounded-full font-bold">${t.qtyBadgeLabel(group.qty)}</span>
                                 </div>
-                                <span class="text-[10px] text-rosegold font-semibold">${group.size ? 'Size: ' + group.size + ' | ' : ''}${group.selectedColor ? i18n[window.currentLang].colorWord + ': ' + group.selectedColor + ' | ' : ''}${group.price * group.qty} EGP</span>
+                                <span class="text-[10px] text-rosegold font-semibold">${loc.size ? t.sizeWord + ': ' + loc.size + ' | ' : ''}${displayColor ? t.colorWord + ': ' + displayColor + ' | ' : ''}${group.price * group.qty} EGP</span>
                             </div>
                         </div>
                         <div class="flex items-center gap-1.5 shrink-0">
@@ -1729,7 +2076,7 @@
             if (stats.hasGift) giftRow.classList.remove('hidden');
             else giftRow.classList.add('hidden');
 
-            document.getElementById('cart-shipping-status').innerText = stats.freeShipping ? 'FREE 🎉' : (stats.governorate ? stats.shippingFee + ' EGP' : 'Select governorate at checkout');
+            document.getElementById('cart-shipping-status').innerText = stats.freeShipping ? t.freeShippingWord : (stats.governorate ? stats.shippingFee + ' EGP' : t.selectGovAtCheckout);
             document.getElementById('cart-shipping-status').className = stats.freeShipping ? 'text-green-700 font-bold' : '';
             document.getElementById('cart-final-total').innerText = stats.productsNetTotal + ' EGP';
 
@@ -1748,13 +2095,13 @@
             
             const coShipEl = document.getElementById('co-shipping');
             if (stats.freeShipping) {
-                coShipEl.innerText = 'FREE Shipping 🎉 (0 EGP)';
+                coShipEl.innerText = t.freeShippingBanner;
                 coShipEl.className = 'text-green-700 font-bold';
             } else if (stats.governorate) {
                 coShipEl.innerText = stats.shippingFee + ' EGP';
                 coShipEl.className = 'text-navy font-bold';
             } else {
-                coShipEl.innerText = 'Select Governorate above';
+                coShipEl.innerText = t.selectGovAbove;
                 coShipEl.className = 'text-rosegold font-semibold';
             }
 
@@ -1846,19 +2193,24 @@
             document.documentElement.lang = window.currentLang;
             document.body.dir = window.currentLang === 'ar' ? 'rtl' : 'ltr';
             document.getElementById('lang-btn-text').innerText = window.currentLang === 'en' ? 'عربي' : 'EN';
+            applyStaticTranslations();
             if (window.currentView === 'home') {
                 renderHomeViewInternal();
             } else if (window.currentView === 'category') {
-                renderProductsGridInternal();
+                renderProductsGridInternal(false);
             } else if (window.currentView === 'product' && window.currentProductId) {
-                renderProductDetailInternal(window.currentProductId);
+                renderProductDetailInternal(window.currentProductId, false);
             } else if (window.currentView === 'admin') {
                 renderFullAdminDashboardInternal();
+            } else {
+                updateCartUI();
             }
+            translateVisibleProducts();
         };
 
         window.onload = function() { 
             navigateToState({ view: 'home' }, true);
+            applyStaticTranslations();
             updateCartUI();
             renderHomeViewInternal(); 
         };
