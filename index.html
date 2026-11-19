@@ -12,15 +12,15 @@
             theme: {
                 extend: {
                     colors: {
-                        navy: '#FBE8EE',
-                        'navy-light': '#F6DCE5',
-                        rosegold: '#A82652',
-                        'rosegold-light': '#BE3462',
-                        sand: '#F7E3EA',
-                        'sand-light': '#FBEAF0',
-                        warm: '#E5B8C7',
-                        beige: '#F4D5DF',
-                        velvet: '#ECC2D1'
+                        navy: '#131B2A',
+                        'navy-light': '#1E2A40',
+                        rosegold: '#C48B7F',
+                        'rosegold-light': '#D4A196',
+                        sand: '#F7F1EC',
+                        'sand-light': '#FCF8F4',
+                        warm: '#E8DCD8',
+                        beige: '#F5E8E2',
+                        velvet: '#EAD7D1'
                     },
                     fontFamily: {
                         serif: ['Playfair Display', 'Georgia', 'serif'],
@@ -39,8 +39,8 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #F7E3EA;
-            color: #9E1F4A;
+            background-color: #F7F1EC;
+            color: #131B2A;
             margin: 0;
             padding: 0;
             -webkit-user-select: none;
@@ -50,35 +50,62 @@
             -webkit-touch-callout: none;
             transition: background-color 0.25s ease, color 0.25s ease;
         }
-        body:not(.dark-pink-mode) .text-navy,
-        body:not(.dark-pink-mode) .text-navy\/70,
-        body:not(.dark-pink-mode) .text-navy\/75,
-        body:not(.dark-pink-mode) .text-navy\/80,
-        body:not(.dark-pink-mode) .text-navy\/85,
-        body:not(.dark-pink-mode) .text-navy\/60,
-        body:not(.dark-pink-mode) .text-navy\/50,
-        body:not(.dark-pink-mode) .text-navy\/40,
-        body:not(.dark-pink-mode) .text-rosegold,
-        body:not(.dark-pink-mode) .text-rosegold-light,
-        body:not(.dark-pink-mode) .text-sand,
-        body:not(.dark-pink-mode) .text-sand\/70,
-        body:not(.dark-pink-mode) .text-sand\/50 {
-            color: #9E1F4A !important;
-        }
-        body:not(.dark-pink-mode) .bg-navy .text-sand,
         body:not(.dark-pink-mode) .bg-navy {
-            color: #9E1F4A !important;
+            background-color: #131B2A !important;
+            color: #FAF5F5 !important;
+        }
+        body:not(.dark-pink-mode) .bg-navy .text-sand {
+            color: #F7F1EC !important;
+        }
+        body:not(.dark-pink-mode) .text-sand {
+            color: #F7F1EC !important;
+        }
+        body:not(.dark-pink-mode) .text-sand\/70 {
+            color: rgba(247, 241, 236, 0.72) !important;
+        }
+        body:not(.dark-pink-mode) .text-sand\/50 {
+            color: rgba(247, 241, 236, 0.55) !important;
+        }
+        body:not(.dark-pink-mode) .text-navy {
+            color: #131B2A !important;
+        }
+        body:not(.dark-pink-mode) .text-navy\/85 {
+            color: rgba(19, 27, 42, 0.85) !important;
+        }
+        body:not(.dark-pink-mode) .text-navy\/80 {
+            color: rgba(19, 27, 42, 0.8) !important;
+        }
+        body:not(.dark-pink-mode) .text-navy\/75 {
+            color: rgba(19, 27, 42, 0.75) !important;
+        }
+        body:not(.dark-pink-mode) .text-navy\/70 {
+            color: rgba(19, 27, 42, 0.7) !important;
+        }
+        body:not(.dark-pink-mode) .text-navy\/60 {
+            color: rgba(19, 27, 42, 0.6) !important;
+        }
+        body:not(.dark-pink-mode) .text-navy\/50 {
+            color: rgba(19, 27, 42, 0.5) !important;
+        }
+        body:not(.dark-pink-mode) .text-navy\/40 {
+            color: rgba(19, 27, 42, 0.4) !important;
+        }
+        body:not(.dark-pink-mode) .text-rosegold {
+            color: #C48B7F !important;
+        }
+        body:not(.dark-pink-mode) .text-rosegold-light {
+            color: #D4A196 !important;
         }
         body:not(.dark-pink-mode) input,
         body:not(.dark-pink-mode) select,
         body:not(.dark-pink-mode) textarea {
-            background-color: #FBEAF0 !important;
-            color: #9E1F4A !important;
-            border-color: #DFACBD !important;
+            background-color: #FCF8F4 !important;
+            color: #131B2A !important;
+            border-color: #E8DCD8 !important;
         }
         body:not(.dark-pink-mode) input::placeholder,
         body:not(.dark-pink-mode) textarea::placeholder {
-            color: rgba(158, 31, 74, 0.65) !important;
+            color: rgba(19, 27, 42, 0.45) !important;
         }
         body.dark-pink-mode {
             background-color: #0B090C;
@@ -404,6 +431,12 @@
                         <span>Final Invoice Total:</span>
                         <span id="co-total" class="text-rosegold">0 EGP</span>
                     </div>
+                </div>
+                <div dir="rtl" lang="ar" class="bg-rosegold/10 border border-rosegold/40 rounded-xl p-3.5 text-right space-y-1">
+                    <p class="text-xs font-extrabold text-rosegold">ملاحظة هامة:</p>
+                    <p class="text-xs font-bold text-navy leading-relaxed">
+                        متاح معاينة الأوردر وقت الاستلام والاسترجاع بيكون في وجود المندوب فقط، وفي جميع الحالات يتم دفع مصاريف الشحن وفقاً لسياسة شركة الشحن.
+                    </p>
                 </div>
                 <button type="submit" class="w-full py-3.5 bg-navy hover:bg-rosegold text-sand font-bold rounded-xl text-xs uppercase tracking-widest transition-all cursor-pointer shadow-md">
                     Confirm Order
