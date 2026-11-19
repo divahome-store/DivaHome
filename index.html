@@ -1239,6 +1239,7 @@
                             </div>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
+                            <button type="button" onclick="openEditProductModal('${p.id}')" class="bg-rosegold hover:bg-rosegold-light text-white px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer">Edit Product</button>
                             <button type="button" onclick="editProductColors('${p.id}')" class="bg-navy hover:bg-rosegold text-sand px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer">Edit Colors</button>
                             <button type="button" onclick="toggleSoldOut('${p.id}', ${isSoldOut})" class="${isSoldOut ? 'bg-green-600 hover:bg-green-700' : 'bg-amber-600 hover:bg-amber-700'} text-white px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer">
                                 ${isSoldOut ? 'Mark Available' : 'Sold Out'}
@@ -1259,10 +1260,13 @@
                                 <span class="font-bold text-xs text-navy">Order #${idx + 1} - ${ord.name}</span>
                                 <span class="text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase ${isDone ? 'bg-emerald-600 text-white' : 'bg-rosegold/20 text-rosegold'}">${isDone ? 'Completed ✓' : 'Pending'}</span>
                             </div>
-                            <div class="flex items-center gap-2.5">
+                            <div class="flex flex-wrap items-center gap-2">
                                 <span class="text-xs font-bold text-rosegold">${ord.total} EGP</span>
                                 <button type="button" onclick="toggleOrderCompleted('${ord.id}', ${isDone})" class="${isDone ? 'bg-amber-600 hover:bg-amber-700' : 'bg-emerald-600 hover:bg-emerald-700'} text-white px-3 py-1 rounded-lg text-[11px] font-bold cursor-pointer transition-colors">
                                     ${isDone ? 'Mark Pending' : 'Mark Completed ✓'}
+                                </button>
+                                <button type="button" onclick="deleteOrder('${ord.id}')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-[11px] font-bold cursor-pointer transition-colors">
+                                    Delete Order
                                 </button>
                             </div>
                         </div>
@@ -1467,6 +1471,112 @@
             });
         };
 
+        window.openEditProductModal = function(id) {
+            const prod = window.products.find(p => p.id === id);
+            if (!prod) return;
+
+            const existingModal = document.getElementById('edit-product-modal');
+            if (existingModal) existingModal.remove();
+
+            const currentImgs = (prod.images && prod.images.length > 0)
+                ? prod.images.join('\n')
+                : (prod.img || '');
+            const currentColors = Array.isArray(prod.colors) ? prod.colors.join(', ') : '';
+
+            const modal = document.createElement('div');
+            modal.id = 'edit-product-modal';
+            modal.className = 'fixed inset-0 bg-navy/70 backdrop-blur-xs z-[100] flex items-center justify-center p-4 overflow-y-auto';
+            modal.innerHTML = `
+                <div class="bg-sand-light max-w-lg w-full rounded-2xl shadow-2xl border border-warm/60 p-6 space-y-4 my-8">
+                    <div class="flex items-center justify-between border-b border-warm/40 pb-2.5">
+                        <h4 class="font-serif text-base font-bold text-navy">Edit Product: ${prod.title}</h4>
+                        <button type="button" onclick="document.getElementById('edit-product-modal').remove()" class="text-navy hover:text-rosegold text-xl font-bold cursor-pointer">&times;</button>
+                    </div>
+                    <form id="edit-product-form" class="space-y-3.5 text-xs">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-bold text-navy mb-1">Product Title *</label>
+                                <input type="text" id="edit-p-title" required value="${(prod.title || '').replace(/"/g, '&quot;')}" class="w-full p-2.5 rounded-lg border border-warm focus:border-rosegold focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-navy mb-1">Price (EGP) *</label>
+                                <input type="number" id="edit-p-price" required min="1" value="${prod.price || ''}" class="w-full p-2.5 rounded-lg border border-warm focus:border-rosegold focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-navy mb-1">Category *</label>
+                                <select id="edit-p-cat" required class="w-full p-2.5 rounded-lg border border-warm focus:border-rosegold focus:outline-none">
+                                    <option value="pajamas" ${prod.category === 'pajamas' ? 'selected' : ''}>Pajamas</option>
+                                    <option value="jumpsuit-blanket" ${prod.category === 'jumpsuit-blanket' ? 'selected' : ''}>Jumpsuit & Blanket</option>
+                                    <option value="new-collection" ${prod.category === 'new-collection' ? 'selected' : ''}>New Collection</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block font-bold text-navy mb-1">Size</label>
+                                <input type="text" id="edit-p-size" value="${(prod.size || '').replace(/"/g, '&quot;')}" placeholder="e.g., M, L, Big size" class="w-full p-2.5 rounded-lg border border-warm focus:border-rosegold focus:outline-none">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-navy mb-1">Available Colors (Comma separated)</label>
+                            <input type="text" id="edit-p-colors" value="${currentColors.replace(/"/g, '&quot;')}" placeholder="e.g., Pink, Beige, Navy" class="w-full p-2.5 rounded-lg border border-warm focus:border-rosegold focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-navy mb-1">Product Description *</label>
+                            <textarea id="edit-p-desc" required rows="3" class="w-full p-2.5 rounded-lg border border-warm focus:border-rosegold focus:outline-none">${prod.description || ''}</textarea>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-navy mb-1">Images Links (One per line or comma separated) *</label>
+                            <textarea id="edit-p-imgs" required rows="4" class="w-full p-2.5 rounded-lg border border-warm focus:border-rosegold focus:outline-none font-mono text-[11px]">${currentImgs}</textarea>
+                        </div>
+                        <div class="flex gap-2.5 justify-end pt-2">
+                            <button type="button" onclick="document.getElementById('edit-product-modal').remove()" class="px-4 py-2.5 bg-beige text-navy rounded-xl text-xs font-bold cursor-pointer">Cancel</button>
+                            <button type="submit" class="px-5 py-2.5 bg-navy hover:bg-rosegold text-sand rounded-xl text-xs font-bold cursor-pointer shadow-md">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            document.getElementById('edit-product-form').onsubmit = async (e) => {
+                e.preventDefault();
+                try {
+                    const updatedTitle = document.getElementById('edit-p-title').value.trim();
+                    const updatedPrice = Number(document.getElementById('edit-p-price').value);
+                    const updatedCat = document.getElementById('edit-p-cat').value;
+                    const updatedSize = document.getElementById('edit-p-size').value.trim();
+                    const updatedColors = document.getElementById('edit-p-colors').value
+                        .split(/[,،\n]+/)
+                        .map(c => c.trim())
+                        .filter(c => c.length > 0);
+                    const updatedDesc = document.getElementById('edit-p-desc').value.trim();
+                    const updatedImgs = document.getElementById('edit-p-imgs').value
+                        .split(/[\n,]+/)
+                        .map(s => s.trim())
+                        .filter(s => s.length > 0);
+
+                    if (updatedImgs.length === 0) {
+                        showToast('Please add at least one image link.');
+                        return;
+                    }
+
+                    await updateDoc(doc(db, 'products', id), {
+                        title: updatedTitle,
+                        price: updatedPrice,
+                        category: updatedCat,
+                        size: updatedSize,
+                        colors: updatedColors,
+                        description: updatedDesc,
+                        images: updatedImgs,
+                        img: updatedImgs[0]
+                    });
+
+                    modal.remove();
+                    showToast('✅ Product updated live!');
+                } catch (err) {
+                    showToast('Error: ' + err.message);
+                }
+            };
+        };
+
         window.toggleOrderCompleted = async function(id, currentStatus) {
             try {
                 await updateDoc(doc(db, 'orders', id), { completed: !currentStatus });
@@ -1474,6 +1584,17 @@
             } catch (err) {
                 showToast('Error: ' + err.message);
             }
+        };
+
+        window.deleteOrder = function(id) {
+            showConfirmModal('Are you sure you want to delete this order?', async () => {
+                try {
+                    await deleteDoc(doc(db, 'orders', id));
+                    showToast('Order deleted');
+                } catch (err) {
+                    showToast('Error: ' + err.message);
+                }
+            });
         };
 
         window.calculateCartTotals = function() {
