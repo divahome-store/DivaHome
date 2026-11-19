@@ -47,14 +47,33 @@
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
+            -webkit-touch-callout: none;
         }
         .font-serif {
             font-family: 'Playfair Display', Georgia, serif;
+        }
+        img {
+            pointer-events: none;
+            -webkit-user-drag: none;
         }
         a { text-decoration: none; }
     </style>
 </head>
 <body class="bg-sand text-navy antialiased min-h-screen flex flex-col selection:bg-rosegold selection:text-white" oncontextmenu="return false;">
+
+    <!-- Custom Toast Notification Box -->
+    <div id="toast-box" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-[100] bg-navy text-sand px-5 py-3 rounded-xl shadow-2xl border border-rosegold/40 text-xs font-bold tracking-wide transition-all"></div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="confirm-modal" class="hidden fixed inset-0 bg-navy/70 backdrop-blur-xs z-[100] flex items-center justify-center p-4">
+        <div class="bg-sand-light max-w-xs w-full rounded-2xl shadow-2xl border border-warm/60 p-6 space-y-4 text-center">
+            <p id="confirm-text" class="text-xs font-bold text-navy"></p>
+            <div class="flex gap-3 justify-center">
+                <button type="button" id="confirm-yes-btn" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-xs font-bold cursor-pointer">Yes, Delete</button>
+                <button type="button" onclick="closeConfirmModal()" class="px-4 py-2 bg-beige text-navy rounded-xl text-xs font-bold cursor-pointer">Cancel</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Top Announcement Bar -->
     <div class="bg-navy text-sand py-2.5 px-4 text-center text-[11px] sm:text-xs tracking-widest uppercase font-medium border-b border-warm/20 shadow-xs">
@@ -112,9 +131,27 @@
     </header>
 
     <!-- Main View Dynamic Container -->
-    <main id="app-view" class="flex-grow">
+    <main id="app-view" class="flex-grow pb-20">
         <!-- Content injects dynamically -->
     </main>
+
+    <!-- Floating Bottom Basket Bar -->
+    <div id="floating-cart-bar" onclick="openCartDrawer()" class="hidden fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:w-96 z-40 bg-navy hover:bg-navy-light text-sand p-4 rounded-2xl shadow-2xl border border-rosegold/50 flex items-center justify-between cursor-pointer transition-all transform hover:scale-[1.02]">
+        <div class="flex items-center gap-3">
+            <div class="relative bg-rosegold text-white p-2.5 rounded-xl">
+                <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                <span id="floating-cart-count" class="absolute -top-1.5 -right-1.5 bg-white text-navy text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold shadow">0</span>
+            </div>
+            <div>
+                <p id="floating-cart-label" class="text-xs font-bold uppercase tracking-wider text-sand">View Basket</p>
+                <p id="floating-cart-promo" class="text-[10px] text-rosegold-light font-semibold"></p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <span id="floating-cart-total" class="text-sm font-bold text-white">0 EGP</span>
+            <span class="text-rosegold font-bold text-sm">&rarr;</span>
+        </div>
+    </div>
 
     <!-- Global Footer -->
     <footer class="bg-navy text-sand border-t border-warm/20 pt-12 pb-8 px-4 sm:px-6 lg:px-8 relative z-10">
@@ -152,13 +189,31 @@
             <h3 class="font-serif text-lg font-bold text-navy">Shopping Bag</h3>
             <button type="button" onclick="closeCartDrawer()" class="text-navy hover:text-rosegold text-xl font-bold cursor-pointer">&times;</button>
         </div>
+        <!-- Live Promos Banner inside Cart -->
+        <div id="cart-promos-banner" class="bg-navy/5 px-4 py-2.5 border-b border-warm/30 text-[11px] text-navy space-y-1"></div>
         <div id="cart-items-container" class="flex-grow overflow-y-auto p-4 sm:p-6 space-y-4"></div>
-        <div class="p-4 sm:p-6 border-t border-warm/40 bg-sand space-y-3">
-            <div class="flex justify-between text-sm font-bold text-navy">
+        <div class="p-4 sm:p-6 border-t border-warm/40 bg-sand space-y-2.5">
+            <div class="flex justify-between text-xs text-navy/70 font-medium">
                 <span>Subtotal</span>
-                <span id="cart-subtotal" class="text-rosegold">0 EGP</span>
+                <span id="cart-subtotal">0 EGP</span>
             </div>
-            <button type="button" onclick="openCheckoutModal()" class="w-full py-3.5 bg-navy hover:bg-rosegold text-sand font-bold rounded-xl text-xs uppercase tracking-widest transition-all cursor-pointer shadow-md">
+            <div id="cart-discount-row" class="hidden flex justify-between text-xs text-green-700 font-bold">
+                <span>10% Bundle Discount (3+ items)</span>
+                <span id="cart-discount">-0 EGP</span>
+            </div>
+            <div id="cart-gift-row" class="hidden flex justify-between text-xs text-rosegold font-bold">
+                <span>🎁 Special Page Gift (6+ items)</span>
+                <span>FREE</span>
+            </div>
+            <div class="flex justify-between text-xs font-semibold text-navy/80">
+                <span>Shipping</span>
+                <span id="cart-shipping-status">Select governorate at checkout</span>
+            </div>
+            <div class="flex justify-between text-sm font-bold text-navy pt-2 border-t border-warm/40">
+                <span>Subtotal Total</span>
+                <span id="cart-final-total" class="text-rosegold">0 EGP</span>
+            </div>
+            <button type="button" onclick="openCheckoutModal()" class="w-full py-3.5 bg-navy hover:bg-rosegold text-sand font-bold rounded-xl text-xs uppercase tracking-widest transition-all cursor-pointer shadow-md mt-2">
                 Proceed to Checkout
             </button>
         </div>
@@ -185,22 +240,90 @@
                 <h3 class="font-serif text-base font-bold">Shipping & Checkout</h3>
                 <button type="button" onclick="closeCheckoutModal()" class="text-sand/70 hover:text-white text-xl font-bold cursor-pointer">&times;</button>
             </div>
-            <form onsubmit="handlePlaceOrder(event)" class="p-6 space-y-4">
+            <form onsubmit="handlePlaceOrder(event)" class="p-6 space-y-3.5">
                 <div>
-                    <label class="block text-xs font-bold text-navy mb-1">Full Name *</label>
-                    <input type="text" required id="cust-name" class="w-full text-xs p-2.5 rounded-lg border border-warm focus:border-rosegold focus:outline-none">
+                    <label class="block text-xs font-bold text-navy mb-1">Full Name (First & Last Name) *</label>
+                    <input type="text" required id="cust-name" placeholder="e.g., Menna Mohamed" class="w-full text-xs p-2.5 rounded-lg border border-warm focus:border-rosegold focus:outline-none">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-navy mb-1">Mobile Number *</label>
+                        <input type="tel" required id="cust-phone" placeholder="01xxxxxxxxx" class="w-full text-xs p-2.5 rounded-lg border border-warm focus:border-rosegold focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-navy mb-1">Additional Phone (Optional)</label>
+                        <input type="tel" id="cust-alt-phone" placeholder="01xxxxxxxxx" class="w-full text-xs p-2.5 rounded-lg border border-warm focus:border-rosegold focus:outline-none">
+                    </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-navy mb-1">Phone Number *</label>
-                    <input type="tel" required id="cust-phone" class="w-full text-xs p-2.5 rounded-lg border border-warm focus:border-rosegold focus:outline-none">
+                    <label class="block text-xs font-bold text-navy mb-1">WhatsApp Number (Optional)</label>
+                    <input type="tel" id="cust-whatsapp" placeholder="01xxxxxxxxx" class="w-full text-xs p-2.5 rounded-lg border border-warm focus:border-rosegold focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-navy mb-1">Governorate / المحافظة *</label>
+                    <select required id="cust-gov" onchange="updateCartUI()" class="w-full text-xs p-2.5 rounded-lg border border-warm bg-white focus:border-rosegold focus:outline-none font-semibold text-navy">
+                        <option value="" data-fee="0">-- اختر المحافظة / Select Governorate --</option>
+                        <optgroup label="75 EGP Shipping">
+                            <option value="القاهرة (Cairo)" data-fee="75">القاهرة / Cairo — 75 EGP</option>
+                            <option value="الجيزة (Giza)" data-fee="75">الجيزة / Giza — 75 EGP</option>
+                            <option value="الإسكندرية (Alexandria)" data-fee="75">الإسكندرية / Alexandria — 75 EGP</option>
+                        </optgroup>
+                        <optgroup label="85 EGP Shipping">
+                            <option value="الإسماعيلية (Ismailia)" data-fee="85">الإسماعيلية / Ismailia — 85 EGP</option>
+                            <option value="السويس (Suez)" data-fee="85">السويس / Suez — 85 EGP</option>
+                            <option value="بورسعيد (Port Said)" data-fee="85">بورسعيد / Port Said — 85 EGP</option>
+                            <option value="الدقهلية (Dakahlia)" data-fee="85">الدقهلية / Dakahlia — 85 EGP</option>
+                            <option value="المنوفية (Monufia)" data-fee="85">المنوفية / Monufia — 85 EGP</option>
+                            <option value="القليوبية (Qalyubia)" data-fee="85">القليوبية / Qalyubia — 85 EGP</option>
+                            <option value="الشرقية (Sharqia)" data-fee="85">الشرقية / Sharqia — 85 EGP</option>
+                            <option value="الغربية (Gharbia)" data-fee="85">الغربية / Gharbia — 85 EGP</option>
+                            <option value="دمياط (Damietta)" data-fee="85">دمياط / Damietta — 85 EGP</option>
+                            <option value="كفر الشيخ (Kafr El Sheikh)" data-fee="85">كفر الشيخ / Kafr El Sheikh — 85 EGP</option>
+                            <option value="البحيرة (Beheira)" data-fee="85">البحيرة / Beheira — 85 EGP</option>
+                        </optgroup>
+                        <optgroup label="100 EGP Shipping">
+                            <option value="بني سويف (Beni Suef)" data-fee="100">بني سويف / Beni Suef — 100 EGP</option>
+                            <option value="المنيا (Minya)" data-fee="100">المنيا / Minya — 100 EGP</option>
+                            <option value="أسيوط (Assiut)" data-fee="100">أسيوط / Assiut — 100 EGP</option>
+                            <option value="سوهاج (Sohag)" data-fee="100">سوهاج / Sohag — 100 EGP</option>
+                            <option value="قنا (Qena)" data-fee="100">قنا / Qena — 100 EGP</option>
+                            <option value="الأقصر (Luxor)" data-fee="100">الأقصر / Luxor — 100 EGP</option>
+                            <option value="أسوان (Aswan)" data-fee="100">أسوان / Aswan — 100 EGP</option>
+                            <option value="البحر الأحمر (Red Sea)" data-fee="100">البحر الأحمر / Red Sea — 100 EGP</option>
+                        </optgroup>
+                        <optgroup label="110 EGP Shipping">
+                            <option value="مطروح (Matrouh)" data-fee="110">مطروح / Matrouh — 110 EGP</option>
+                            <option value="الوادي الجديد (New Valley)" data-fee="110">الوادي الجديد / New Valley — 110 EGP</option>
+                            <option value="جنوب سيناء (South Sinai)" data-fee="110">جنوب سيناء / South Sinai — 110 EGP</option>
+                            <option value="شمال سيناء (North Sinai)" data-fee="110">شمال سيناء / North Sinai — 110 EGP</option>
+                        </optgroup>
+                    </select>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-navy mb-1">Detailed Address *</label>
-                    <textarea required id="cust-address" rows="2" class="w-full text-xs p-2.5 rounded-lg border border-warm focus:border-rosegold focus:outline-none"></textarea>
+                    <textarea required id="cust-address" rows="2" placeholder="Area, Street, Building, Floor, Apartment..." class="w-full text-xs p-2.5 rounded-lg border border-warm focus:border-rosegold focus:outline-none"></textarea>
                 </div>
-                <div class="flex justify-between text-navy font-bold text-sm pt-2 border-t border-warm/50">
-                    <span>Total Amount:</span>
-                    <span id="co-total" class="text-rosegold">0 EGP</span>
+                <div id="co-summary-box" class="bg-beige/60 p-3.5 rounded-xl border border-warm/40 space-y-1.5 text-xs">
+                    <div class="flex justify-between text-navy/80">
+                        <span>Products Subtotal:</span>
+                        <span id="co-subtotal">0 EGP</span>
+                    </div>
+                    <div id="co-discount-row" class="hidden flex justify-between text-green-700 font-bold">
+                        <span>10% Discount (3+ items):</span>
+                        <span id="co-discount">-0 EGP</span>
+                    </div>
+                    <div id="co-gift-row" class="hidden flex justify-between text-rosegold font-bold">
+                        <span>🎁 Free Page Gift (6+ items):</span>
+                        <span>Included</span>
+                    </div>
+                    <div class="flex justify-between text-navy/80 font-semibold">
+                        <span>Shipping Fee:</span>
+                        <span id="co-shipping">Select Governorate</span>
+                    </div>
+                    <div class="flex justify-between text-navy font-bold text-sm pt-2 border-t border-warm/50">
+                        <span>Final Invoice Total:</span>
+                        <span id="co-total" class="text-rosegold">0 EGP</span>
+                    </div>
                 </div>
                 <button type="submit" class="w-full py-3.5 bg-navy hover:bg-rosegold text-sand font-bold rounded-xl text-xs uppercase tracking-widest transition-all cursor-pointer shadow-md">
                     Confirm Order
@@ -212,7 +335,7 @@
     <!-- Live Cloud Firestore SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, deleteDoc, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, setDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBfTMgkwVhhy9QrA9iIZv_HEE5YVKTmT80",
@@ -227,48 +350,137 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        window.showToast = function(msg) {
+            const box = document.getElementById('toast-box');
+            box.innerText = msg;
+            box.classList.remove('hidden');
+            clearTimeout(window.toastTimer);
+            window.toastTimer = setTimeout(() => {
+                box.classList.add('hidden');
+            }, 3000);
+        };
+
+        window.showConfirmModal = function(text, onConfirm) {
+            document.getElementById('confirm-text').innerText = text;
+            document.getElementById('confirm-modal').classList.remove('hidden');
+            document.getElementById('confirm-yes-btn').onclick = () => {
+                closeConfirmModal();
+                onConfirm();
+            };
+        };
+
+        window.closeConfirmModal = function() {
+            document.getElementById('confirm-modal').classList.add('hidden');
+        };
+
         const defaultCovers = {
             'pajamas': 'https://divahome-store.github.io/DivaHome/IMG_0154.jpeg',
             'jumpsuit-blanket': 'https://divahome-store.github.io/DivaHome/IMG_0663.jpeg',
             'new-collection': 'https://divahome-store.github.io/DivaHome/IMG_0164.jpeg'
         };
 
-        const cachedCovers = JSON.parse(localStorage.getItem('diva_cached_covers') || 'null');
-        window.categoryCovers = cachedCovers ? { ...defaultCovers, ...cachedCovers, 'jumpsuit-blanket': 'https://divahome-store.github.io/DivaHome/IMG_0663.jpeg' } : defaultCovers;
-        window.coversSyncedFromCloud = true;
-
+        window.categoryCovers = { ...defaultCovers };
         window.products = [];
+        window.orders = [];
         window.currentLang = 'en';
+        window.currentView = 'home';
         window.currentCategory = 'all';
         window.currentSizeFilter = 'all';
+        window.currentProductId = null;
         window.cart = [];
         window.isAdminLoggedIn = false;
+
+        function navigateToState(state, replace = false) {
+            try {
+                if (replace) {
+                    history.replaceState(state, '', '');
+                } else {
+                    history.pushState(state, '', '');
+                }
+            } catch (e) {}
+        }
+
+        window.addEventListener('popstate', (event) => {
+            const cartDrawer = document.getElementById('cart-drawer');
+            if (!cartDrawer.classList.contains('translate-x-full')) {
+                closeCartDrawer();
+                return;
+            }
+            const checkoutModal = document.getElementById('checkout-modal');
+            if (!checkoutModal.classList.contains('hidden')) {
+                closeCheckoutModal();
+                return;
+            }
+            const adminModal = document.getElementById('admin-login-modal');
+            if (!adminModal.classList.contains('hidden')) {
+                closeAdminLoginModal();
+                return;
+            }
+
+            const state = event.state;
+            if (!state || state.view === 'home') {
+                renderHomeViewInternal();
+            } else if (state.view === 'category') {
+                window.currentCategory = state.category || 'pajamas';
+                window.currentSizeFilter = state.sizeFilter || 'all';
+                renderProductsGridInternal();
+            } else if (state.view === 'product') {
+                window.currentCategory = state.category || 'pajamas';
+                window.currentProductId = state.productId;
+                renderProductDetailInternal(state.productId);
+            } else if (state.view === 'admin') {
+                renderFullAdminDashboardInternal();
+            }
+        });
+
+        window.goBackStep = function() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                if (window.currentView === 'product' && window.currentCategory && window.currentCategory !== 'all') {
+                    filterCategory(window.currentCategory);
+                } else {
+                    showHomeView();
+                }
+            }
+        };
 
         onSnapshot(doc(db, 'store_settings', 'covers'), (docSnap) => {
             if (docSnap.exists()) {
                 const cloudData = docSnap.data();
                 window.categoryCovers = {
                     'pajamas': cloudData['pajamas'] || defaultCovers['pajamas'],
-                    'jumpsuit-blanket': 'https://divahome-store.github.io/DivaHome/IMG_0663.jpeg',
+                    'jumpsuit-blanket': cloudData['jumpsuit-blanket'] || defaultCovers['jumpsuit-blanket'],
                     'new-collection': cloudData['new-collection'] || defaultCovers['new-collection']
                 };
-                localStorage.setItem('diva_cached_covers', JSON.stringify(window.categoryCovers));
             }
-            window.coversSyncedFromCloud = true;
-            if (window.currentCategory === 'all') showHomeView();
-        });
+            if (window.currentView === 'home') renderHomeViewInternal();
+        }, (err) => console.error(err));
 
         onSnapshot(collection(db, 'products'), (snapshot) => {
             window.products = [];
             snapshot.forEach(docSnap => {
                 window.products.push({ id: docSnap.id, ...docSnap.data() });
             });
-            if (window.currentCategory !== 'all' && window.currentCategory !== 'admin') {
-                renderProductsGrid();
-            } else if (window.currentCategory === 'admin') {
-                renderFullAdminDashboard();
+            if (window.currentView === 'category') {
+                renderProductsGridInternal();
+            } else if (window.currentView === 'product' && window.currentProductId) {
+                renderProductDetailInternal(window.currentProductId);
+            } else if (window.currentView === 'admin') {
+                renderFullAdminDashboardInternal();
             }
-        });
+        }, (err) => console.error(err));
+
+        onSnapshot(collection(db, 'orders'), (snapshot) => {
+            window.orders = [];
+            snapshot.forEach(docSnap => {
+                window.orders.push({ id: docSnap.id, ...docSnap.data() });
+            });
+            window.orders.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+            if (window.currentView === 'admin') {
+                renderFullAdminDashboardInternal();
+            }
+        }, (err) => console.error(err));
 
         const i18n = {
             en: {
@@ -277,13 +489,19 @@
                 pajamaDesc: "All-season soft sleepwear sets designed for your everyday comfort ritual.",
                 jumpsuitDesc: "Trendy cozy plush wearable blankets & character jumpsuits.",
                 newDesc: "Discover our latest seasonal releases & exclusive lounge designs.",
-                addToBag: "Add to Bag",
+                viewDetails: "View Product",
+                soldOut: "Sold Out",
                 noCover: "No Image Set Yet. Add from Admin Dashboard!",
                 filterBySize: "Filter by Size:",
                 allSizes: "All Sizes",
                 sizeNoteM: "Note: This size fits weights from 65 to 85 kg.",
                 sizeNoteL: "Note: This size fits weights from 85 to 110 kg.",
-                emptyCategory: "No products found for this size or category yet."
+                emptyCategory: "No products found for this size or category yet.",
+                viewBasket: "View Basket & Checkout",
+                backBtn: "Back",
+                productDescTitle: "Product Description",
+                noDescription: "Luxurious, ultra-soft fabric crafted for maximum comfort and elegance at home.",
+                addToBag: "Add to Bag 🛍️"
             },
             ar: {
                 heroHeadline: "اجعلي أمسياتكِ أكثر نعومة وراحة.",
@@ -291,24 +509,39 @@
                 pajamaDesc: "تشكيلة ملابس نوم مريحة وناعمة تناسب جميع فصول السنة.",
                 jumpsuitDesc: "الجامبسوت الشتوي الأكثر طلباً مع بطانيات مفروشة مريحة ودافئة.",
                 newDesc: "اكتشفي أحدث صيحات الموضة المنزلية والتصاميم الحصرية.",
-                addToBag: "إضافة للسلة",
+                viewDetails: "عرض المنتج",
+                soldOut: "نفدت الكمية",
                 noCover: "لم تقمي بإضافة صورة بعد. يمكنك إضافتها من لوحة الإدارة!",
                 filterBySize: "تصفية حسب المقاس:",
                 allSizes: "جميع المقاسات",
                 sizeNoteM: "ملحوظة: هذا المقاس يناسب وزن من 65 لـ 85 كجم.",
                 sizeNoteL: "ملحوظة: هذا المقاس يناسب وزن من 85 لـ 110 كجم.",
-                emptyCategory: "لا توجد منتجات في هذا المقاس أو القسم حالياً."
+                emptyCategory: "لا توجد منتجات في هذا المقاس أو القسم حالياً.",
+                viewBasket: "عرض السلة وإتمام الطلب",
+                backBtn: "رجوع",
+                productDescTitle: "وصف المنتج",
+                noDescription: "خامة فاخرة وناعمة جداً مصممة لتمنحكِ أقصى درجات الراحة والأناقة في المنزل.",
+                addToBag: "إضافة للسلة 🛍️"
             }
         };
 
         window.showHomeView = function() {
+            navigateToState({ view: 'home' });
+            renderHomeViewInternal();
+        };
+
+        function renderHomeViewInternal() {
+            window.currentView = 'home';
             window.currentCategory = 'all';
             window.currentSizeFilter = 'all';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            updateCartUI();
+
             const appContainer = document.getElementById('app-view');
             
             const renderCoverBox = (imgUrl, altText) => {
                 if (imgUrl) {
-                    return `<img src="${imgUrl}" onerror="this.src='https://placehold.co/400x500/F7EFEF/131B2A?text=Diva+Home'" alt="${altText}" class="w-full h-auto max-h-[380px] object-contain rounded-lg">`;
+                    return `<img src="${imgUrl}" onerror="this.src='https://placehold.co/400x500/F7EFEF/131B2A?text=Diva+Home'" alt="${altText}" class="w-full h-auto max-h-[380px] object-contain rounded-lg pointer-events-none">`;
                 }
                 return `<span class="text-xs text-navy/40 font-bold uppercase tracking-wider text-center p-6">${i18n[window.currentLang].noCover}</span>`;
             };
@@ -361,20 +594,26 @@
                     </div>
                 </section>
             `;
-        };
+        }
 
         window.filterCategory = function(cat) {
             window.currentCategory = cat;
             window.currentSizeFilter = 'all';
-            renderProductsGrid();
+            navigateToState({ view: 'category', category: cat, sizeFilter: 'all' });
+            renderProductsGridInternal();
         };
 
         window.filterBySize = function(size) {
             window.currentSizeFilter = size;
-            renderProductsGrid();
+            navigateToState({ view: 'category', category: window.currentCategory, sizeFilter: size }, true);
+            renderProductsGridInternal();
         };
 
-        function renderProductsGrid() {
+        function renderProductsGridInternal() {
+            window.currentView = 'category';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            updateCartUI();
+
             const appContainer = document.getElementById('app-view');
             let filtered = window.products.filter(p => p.category === window.currentCategory);
             
@@ -383,7 +622,6 @@
 
             if (window.currentCategory === 'pajamas') {
                 const pajamaSizes = ['M', 'L', 'Big size'];
-                
                 let sizeButtons = `<button type="button" onclick="filterBySize('all')" class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${window.currentSizeFilter === 'all' ? 'bg-rosegold text-white shadow-md' : 'bg-sand-light text-navy border border-warm/60 hover:bg-beige'}">${i18n[window.currentLang].allSizes}</button>`;
                 
                 pajamaSizes.forEach(sz => {
@@ -403,17 +641,9 @@
                 `;
 
                 if (window.currentSizeFilter === 'M') {
-                    activeSizeNoteBox = `
-                        <div class="mb-6 px-4 py-3 rounded-xl bg-sand-light border-s-4 border-rosegold shadow-xs text-xs sm:text-sm font-semibold text-navy">
-                            ${i18n[window.currentLang].sizeNoteM}
-                        </div>
-                    `;
+                    activeSizeNoteBox = `<div class="mb-6 px-4 py-3 rounded-xl bg-sand-light border-s-4 border-rosegold shadow-xs text-xs sm:text-sm font-semibold text-navy">${i18n[window.currentLang].sizeNoteM}</div>`;
                 } else if (window.currentSizeFilter === 'L') {
-                    activeSizeNoteBox = `
-                        <div class="mb-6 px-4 py-3 rounded-xl bg-sand-light border-s-4 border-rosegold shadow-xs text-xs sm:text-sm font-semibold text-navy">
-                            ${i18n[window.currentLang].sizeNoteL}
-                        </div>
-                    `;
+                    activeSizeNoteBox = `<div class="mb-6 px-4 py-3 rounded-xl bg-sand-light border-s-4 border-rosegold shadow-xs text-xs sm:text-sm font-semibold text-navy">${i18n[window.currentLang].sizeNoteL}</div>`;
                 }
 
                 if (window.currentSizeFilter !== 'all') {
@@ -423,29 +653,42 @@
 
             let categoryTitle = window.currentCategory.replace('-', ' ').toUpperCase();
 
-            let gridCards = filtered.map(item => `
-                <div class="bg-sand-light rounded-2xl overflow-hidden border border-warm/40 shadow-xs hover:shadow-lg transition-all flex flex-col group">
-                    <div class="h-64 sm:h-72 overflow-hidden relative bg-sand flex items-center justify-center p-2">
-                        <img src="${item.img}" onerror="this.src='https://placehold.co/400x500/F7EFEF/131B2A?text=Diva+Home'" alt="${item.title}" class="w-full h-full object-contain pointer-events-none">
-                    </div>
-                    <div class="p-4 flex-grow flex flex-col justify-between space-y-3">
-                        <div>
-                            <span class="text-[10px] uppercase font-bold text-rosegold">${item.category} ${item.size ? '| Size: ' + item.size : ''}</span>
-                            <h3 class="font-bold text-sm text-navy mt-1">${item.title}</h3>
+            let gridCards = filtered.map(item => {
+                const displayImg = (item.images && item.images.length > 0) ? item.images[0] : (item.img || 'https://placehold.co/400x500/F7EFEF/131B2A?text=Diva');
+                const imgCount = (item.images && item.images.length > 1) ? ` (+${item.images.length - 1})` : '';
+                const isSoldOut = Boolean(item.soldOut);
+                return `
+                    <div onclick="openProductPage('${item.id}')" class="bg-sand-light rounded-2xl overflow-hidden border border-warm/40 shadow-xs hover:shadow-lg transition-all flex flex-col group cursor-pointer ${isSoldOut ? 'opacity-85' : ''}">
+                        <div class="h-64 sm:h-72 overflow-hidden relative bg-sand flex items-center justify-center p-2">
+                            <img src="${displayImg}" onerror="this.src='https://placehold.co/400x500/F7EFEF/131B2A?text=Diva+Home'" alt="${item.title}" class="w-full h-full object-contain pointer-events-none ${isSoldOut ? 'grayscale-[40%]' : ''}">
+                            ${isSoldOut ? `<span class="absolute top-3 left-3 bg-red-600 text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow-md">${i18n[window.currentLang].soldOut}</span>` : ''}
+                            ${imgCount ? `<span class="absolute bottom-2 right-2 bg-navy/80 text-white text-[10px] px-2 py-0.5 rounded-md font-bold">${imgCount} photos</span>` : ''}
                         </div>
-                        <div class="flex items-center justify-between pt-2 border-t border-warm/30">
-                            <span class="font-bold text-sm text-navy">${item.price} EGP</span>
-                            <button type="button" onclick="addToCart('${item.id}')" class="bg-navy hover:bg-rosegold text-sand px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer">
-                                ${i18n[window.currentLang].addToBag}
-                            </button>
+                        <div class="p-4 flex-grow flex flex-col justify-between space-y-3">
+                            <div>
+                                <span class="text-[10px] uppercase font-bold text-rosegold">${item.category} ${item.size ? '| Size: ' + item.size : ''}</span>
+                                <h3 class="font-bold text-sm text-navy mt-1">${item.title}</h3>
+                            </div>
+                            <div class="flex items-center justify-between pt-2 border-t border-warm/30">
+                                <span class="font-bold text-sm text-navy">${item.price} EGP</span>
+                                <span class="text-xs font-semibold ${isSoldOut ? 'text-red-500' : 'text-rosegold'} uppercase tracking-wider">${isSoldOut ? i18n[window.currentLang].soldOut : i18n[window.currentLang].viewDetails + ' &rarr;'}</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
 
             appContainer.innerHTML = `
-                <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-                    <h2 class="font-serif text-xl sm:text-2xl font-bold text-navy uppercase mb-6">${categoryTitle}</h2>
+                <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <button type="button" onclick="goBackStep()" class="px-3.5 py-2 rounded-xl bg-sand-light border border-warm/60 text-navy hover:bg-beige text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer">
+                                <span>&larr;</span>
+                                <span>${i18n[window.currentLang].backBtn}</span>
+                            </button>
+                            <h2 class="font-serif text-xl sm:text-2xl font-bold text-navy uppercase">${categoryTitle}</h2>
+                        </div>
+                    </div>
                     ${sizeFilterBar}
                     ${activeSizeNoteBox}
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -455,11 +698,110 @@
             `;
         }
 
+        window.openProductPage = function(id) {
+            const prod = window.products.find(p => p.id === id);
+            if (!prod) return;
+            window.currentProductId = id;
+            window.currentCategory = prod.category || window.currentCategory;
+            navigateToState({ view: 'product', productId: id, category: window.currentCategory });
+            renderProductDetailInternal(id);
+        };
+
+        function renderProductDetailInternal(id) {
+            window.currentView = 'product';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            updateCartUI();
+
+            const prod = window.products.find(p => p.id === id);
+            const appContainer = document.getElementById('app-view');
+
+            if (!prod) {
+                appContainer.innerHTML = `<div class="p-10 text-center text-xs text-navy/60">Product not found.</div>`;
+                return;
+            }
+
+            const imgList = (prod.images && prod.images.length > 0) ? prod.images : [prod.img || 'https://placehold.co/400x500/F7EFEF/131B2A?text=Diva'];
+            const isSoldOut = Boolean(prod.soldOut);
+
+            let sizeNoteText = '';
+            if (prod.size === 'M') sizeNoteText = i18n[window.currentLang].sizeNoteM;
+            else if (prod.size === 'L') sizeNoteText = i18n[window.currentLang].sizeNoteL;
+
+            const thumbsHTML = imgList.length > 1 ? `
+                <div class="flex gap-2.5 mt-4 overflow-x-auto justify-center pb-1">
+                    ${imgList.map(im => `
+                        <div onclick="document.getElementById('detail-main-img').src='${im}'" class="w-16 h-16 rounded-xl border-2 border-warm cursor-pointer hover:border-rosegold overflow-hidden shrink-0 bg-white">
+                            <img src="${im}" class="w-full h-full object-cover pointer-events-none">
+                        </div>
+                    `).join('')}
+                </div>
+            ` : '';
+
+            const descriptionContent = prod.description && prod.description.trim().length > 0
+                ? prod.description.replace(/\n/g, '<br>')
+                : i18n[window.currentLang].noDescription;
+
+            appContainer.innerHTML = `
+                <section class="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+                    <div class="mb-6 flex items-center justify-between">
+                        <button type="button" onclick="goBackStep()" class="px-4 py-2 rounded-xl bg-sand-light border border-warm/60 text-navy hover:bg-beige text-xs font-bold flex items-center gap-2 shadow-xs cursor-pointer">
+                            <span>&larr;</span>
+                            <span>${i18n[window.currentLang].backBtn}</span>
+                        </button>
+                        <span class="text-[11px] uppercase font-bold tracking-widest text-rosegold">${prod.category.replace('-', ' ')}</span>
+                    </div>
+
+                    <div class="bg-sand-light rounded-3xl border border-warm/60 shadow-md overflow-hidden p-5 sm:p-8 space-y-6">
+                        <div class="bg-sand rounded-2xl p-4 flex flex-col items-center justify-center relative">
+                            ${isSoldOut ? `<span class="absolute top-4 left-4 bg-red-600 text-white text-xs px-3.5 py-1 rounded-full font-bold uppercase tracking-wider shadow-md">${i18n[window.currentLang].soldOut}</span>` : ''}
+                            <img id="detail-main-img" src="${imgList[0]}" onerror="this.src='https://placehold.co/400x500/F7EFEF/131B2A?text=Diva+Home'" alt="${prod.title}" class="w-full max-h-[460px] object-contain rounded-xl pointer-events-none ${isSoldOut ? 'grayscale-[40%]' : ''}">
+                            ${thumbsHTML}
+                        </div>
+
+                        <div class="border-b border-warm/40 pb-5 space-y-2">
+                            <h1 class="font-serif text-2xl sm:text-3xl font-bold text-navy">${prod.title}</h1>
+                            <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+                                <p class="text-xl sm:text-2xl font-bold text-rosegold">${prod.price} EGP</p>
+                                ${prod.size ? `<span class="text-xs font-bold bg-beige text-navy px-3.5 py-1.5 rounded-xl border border-warm/50">Size: ${prod.size}</span>` : ''}
+                            </div>
+                            ${sizeNoteText ? `<p class="text-xs text-navy/75 font-semibold pt-1">${sizeNoteText}</p>` : ''}
+                        </div>
+
+                        <div class="space-y-2">
+                            <h3 class="text-xs uppercase tracking-widest font-bold text-navy/60">${i18n[window.currentLang].productDescTitle}</h3>
+                            <p class="text-sm text-navy/85 leading-relaxed">${descriptionContent}</p>
+                        </div>
+
+                        <div class="pt-2">
+                            ${isSoldOut
+                                ? `<button type="button" disabled class="w-full py-4 bg-gray-400 text-white font-bold rounded-2xl text-xs uppercase tracking-widest cursor-not-allowed">${i18n[window.currentLang].soldOut}</button>`
+                                : `<button type="button" onclick="addProductToCartById('${prod.id}')" class="w-full py-4 bg-navy hover:bg-rosegold text-sand font-bold rounded-2xl text-xs sm:text-sm uppercase tracking-widest transition-all cursor-pointer shadow-lg">${i18n[window.currentLang].addToBag}</button>`
+                            }
+                        </div>
+                    </div>
+                </section>
+            `;
+        }
+
+        window.addProductToCartById = function(id) {
+            const p = window.products.find(item => item.id === id);
+            if (!p || p.soldOut) return;
+            const displayImg = (p.images && p.images.length > 0) ? p.images[0] : (p.img || '');
+            window.cart.push({
+                ...p,
+                img: displayImg,
+                cartId: Date.now() + Math.random()
+            });
+            updateCartUI();
+            showToast(window.currentLang === 'ar' ? 'تمت الإضافة للسلة! اضغطي بالأسفل لإتمام الطلب' : 'Added to basket! Tap the bar below when ready.');
+        };
+
         window.handleSecretAdminTrigger = function() {
             if (!window.isAdminLoggedIn) {
                 document.getElementById('admin-login-modal').classList.remove('hidden');
             } else {
-                renderFullAdminDashboard();
+                navigateToState({ view: 'admin' });
+                renderFullAdminDashboardInternal();
             }
         };
 
@@ -473,124 +815,175 @@
             if (pass === 'MMEE@22201110') {
                 window.isAdminLoggedIn = true;
                 closeAdminLoginModal();
-                renderFullAdminDashboard();
+                navigateToState({ view: 'admin' });
+                renderFullAdminDashboardInternal();
             } else {
-                alert('Invalid Passcode!');
+                showToast('Invalid Passcode!');
             }
         };
 
-        window.renderFullAdminDashboard = function() {
+        function renderFullAdminDashboardInternal() {
+            window.currentView = 'admin';
             window.currentCategory = 'admin';
+            updateCartUI();
             const appContainer = document.getElementById('app-view');
 
-            let productRows = window.products.map(p => `
-                <div class="flex items-center justify-between bg-sand p-3 rounded-xl border border-warm/40">
-                    <div class="flex items-center gap-3">
-                        <img src="${p.img}" onerror="this.src='https://placehold.co/100x100/F7EFEF/131B2A?text=Diva'" class="w-12 h-12 object-cover rounded-lg border pointer-events-none">
-                        <div>
-                            <h4 class="font-bold text-xs text-navy">${p.title}</h4>
-                            <p class="text-[10px] text-rosegold">${p.category} ${p.size ? '| Size: ' + p.size : ''} | ${p.price} EGP</p>
+            let productRows = window.products.map(p => {
+                const imgCount = (p.images && p.images.length > 0) ? p.images.length : 1;
+                const firstImg = (p.images && p.images.length > 0) ? p.images[0] : (p.img || '');
+                const isSoldOut = Boolean(p.soldOut);
+                return `
+                    <div class="flex flex-wrap items-center justify-between gap-3 bg-sand p-3 rounded-xl border border-warm/40">
+                        <div class="flex items-center gap-3">
+                            <img src="${firstImg}" onerror="this.src='https://placehold.co/100x100/F7EFEF/131B2A?text=Diva'" class="w-12 h-12 object-cover rounded-lg border pointer-events-none ${isSoldOut ? 'grayscale' : ''}">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h4 class="font-bold text-xs text-navy">${p.title}</h4>
+                                    ${isSoldOut ? '<span class="bg-red-600 text-white text-[9px] px-2 py-0.5 rounded-full font-bold uppercase">Sold Out</span>' : '<span class="bg-green-600 text-white text-[9px] px-2 py-0.5 rounded-full font-bold uppercase">In Stock</span>'}
+                                </div>
+                                <p class="text-[10px] text-rosegold">${p.category} ${p.size ? '| Size: ' + p.size : ''} | ${p.price} EGP | (${imgCount} photos)</p>
+                                ${p.description ? `<p class="text-[10px] text-navy/60 line-clamp-1 max-w-xs">${p.description}</p>` : ''}
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="toggleSoldOut('${p.id}', ${isSoldOut})" class="${isSoldOut ? 'bg-green-600 hover:bg-green-700' : 'bg-amber-600 hover:bg-amber-700'} text-white px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer">
+                                ${isSoldOut ? 'Mark Available' : 'Sold Out'}
+                            </button>
+                            <button type="button" onclick="deleteProduct('${p.id}')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer">Delete</button>
                         </div>
                     </div>
-                    <button type="button" onclick="deleteProduct('${p.id}')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer">Delete</button>
-                </div>
-            `).join('');
+                `;
+            }).join('');
+
+            let orderRows = (window.orders || []).map((ord, idx) => {
+                const itemsList = (ord.items || []).map(i => `${i.title} (${i.size || 'N/A'}) - ${i.price} EGP`).join(', ');
+                return `
+                    <div class="bg-sand p-4 rounded-xl border border-warm/40 space-y-2">
+                        <div class="flex justify-between items-center border-b border-warm/30 pb-2">
+                            <span class="font-bold text-xs text-navy">Order #${idx + 1} - ${ord.name}</span>
+                            <span class="text-xs font-bold text-rosegold">${ord.total} EGP</span>
+                        </div>
+                        <div class="text-[11px] text-navy/85 space-y-1">
+                            <p><strong>Phone:</strong> <a href="tel:${ord.phone}" class="text-rosegold underline">${ord.phone}</a> ${ord.altPhone ? `| <strong>Alt Phone:</strong> ${ord.altPhone}` : ''}</p>
+                            ${ord.whatsapp ? `<p><strong>WhatsApp:</strong> ${ord.whatsapp}</p>` : ''}
+                            <p><strong>Governorate:</strong> ${ord.governorate || 'Not specified'} (Shipping: ${ord.freeShipping ? 'FREE 🎉' : (ord.shippingFee || 0) + ' EGP'})</p>
+                            <p><strong>Address:</strong> ${ord.address}</p>
+                            <p><strong>Items:</strong> ${itemsList}</p>
+                            ${ord.hasDiscount ? `<p class="text-green-700 font-bold">✓ 10% Bundle Discount Applied (-${ord.discountAmount} EGP)</p>` : ''}
+                            ${ord.hasGift ? `<p class="text-rosegold font-bold">🎁 Eligible for Free Page Gift (6+ items)</p>` : ''}
+                            ${ord.freeShipping ? `<p class="text-navy font-bold">🚚 Free Shipping Applied (1500+ EGP)</p>` : ''}
+                            <p class="text-[9px] text-navy/50">Date: ${new Date(ord.createdAt).toLocaleString()}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
 
             appContainer.innerHTML = `
                 <section class="max-w-5xl mx-auto px-4 py-10 space-y-10">
                     <div class="bg-navy text-sand p-6 rounded-2xl flex flex-col sm:flex-row justify-between items-center gap-4 shadow-xl">
                         <div>
                             <h2 class="font-serif text-xl sm:text-2xl font-bold">Diva Home Admin Dashboard</h2>
-                            <p class="text-xs text-sand/70 mt-1">Manage Categories, Sizes & Products with Cloud Firestore</p>
+                            <p class="text-xs text-sand/70 mt-1">Manage Categories, Multi-Image Products & Customer Orders</p>
                         </div>
                         <button type="button" onclick="showHomeView()" class="bg-rosegold text-white px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer">Exit to Store</button>
                     </div>
 
-                    <!-- Section 1: Category Cover Image Links -->
+                    <!-- Section 1: Covers -->
                     <div class="bg-sand-light p-6 rounded-2xl border border-warm/60 shadow-md space-y-4">
                         <h3 class="font-serif text-lg font-bold text-navy border-b pb-2">1. Update Category Cover Image URLs</h3>
-                        <form id="cover-form" onsubmit="handleUpdateCovers(event)" class="space-y-4 text-xs">
+                        <form onsubmit="handleUpdateCovers(event)" class="space-y-4 text-xs">
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div class="space-y-1">
                                     <label class="block font-bold text-navy">Pajamas Cover URL</label>
-                                    <input type="url" id="cov-pajamas" value="${window.categoryCovers['pajamas']}" placeholder="Paste image link" class="w-full p-2.5 rounded-lg border border-warm bg-white focus:outline-none focus:border-rosegold">
+                                    <input type="url" id="cov-pajamas" value="${window.categoryCovers['pajamas']}" class="w-full p-2.5 rounded-lg border border-warm bg-white focus:outline-none focus:border-rosegold">
                                 </div>
                                 <div class="space-y-1">
                                     <label class="block font-bold text-navy">Jumpsuit Cover URL</label>
-                                    <input type="url" id="cov-jumpsuit" value="${window.categoryCovers['jumpsuit-blanket']}" placeholder="Paste image link" class="w-full p-2.5 rounded-lg border border-warm bg-white focus:outline-none focus:border-rosegold">
+                                    <input type="url" id="cov-jumpsuit" value="${window.categoryCovers['jumpsuit-blanket']}" class="w-full p-2.5 rounded-lg border border-warm bg-white focus:outline-none focus:border-rosegold">
                                 </div>
                                 <div class="space-y-1">
                                     <label class="block font-bold text-navy">New Collection URL</label>
-                                    <input type="url" id="cov-new" value="${window.categoryCovers['new-collection']}" placeholder="Paste image link" class="w-full p-2.5 rounded-lg border border-warm bg-white focus:outline-none focus:border-rosegold">
+                                    <input type="url" id="cov-new" value="${window.categoryCovers['new-collection']}" class="w-full p-2.5 rounded-lg border border-warm bg-white focus:outline-none focus:border-rosegold">
                                 </div>
                             </div>
                             <button type="submit" class="w-full py-3 bg-navy hover:bg-rosegold text-sand font-bold rounded-xl uppercase tracking-widest cursor-pointer">Save Covers Live</button>
                         </form>
                     </div>
 
-                    <!-- Section 2: Add New Product with Size Selection -->
+                    <!-- Section 2: Add Product with Multiple Images & Description -->
                     <div class="bg-sand-light p-6 rounded-2xl border border-warm/60 shadow-md space-y-4">
-                        <h3 class="font-serif text-lg font-bold text-navy border-b pb-2">2. Add New Product & Select Size</h3>
-                        <form id="product-form" onsubmit="handleAddProduct(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-                            <div>
-                                <label class="block font-bold text-navy mb-1">Product Title *</label>
-                                <input type="text" id="p-title" required class="w-full p-2.5 rounded-lg border border-warm bg-white focus:outline-none focus:border-rosegold" placeholder="e.g., Silk Pink Pajama">
+                        <h3 class="font-serif text-lg font-bold text-navy border-b pb-2">2. Add New Product (Multiple Photos & Description)</h3>
+                        <form id="product-form" onsubmit="handleAddProduct(event)" class="space-y-4 text-xs">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block font-bold text-navy mb-1">Product Title *</label>
+                                    <input type="text" id="p-title" required class="w-full p-2.5 rounded-lg border border-warm bg-white focus:outline-none focus:border-rosegold" placeholder="e.g., Silk Pink Pajama">
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-navy mb-1">Category *</label>
+                                    <select id="p-cat" required class="w-full p-2.5 rounded-lg border border-warm bg-white focus:outline-none focus:border-rosegold">
+                                        <option value="pajamas">Pajamas</option>
+                                        <option value="jumpsuit-blanket">Jumpsuit & Blanket</option>
+                                        <option value="new-collection">New Collection</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-navy mb-1">Size Option *</label>
+                                    <select id="p-size" required class="w-full p-2.5 rounded-lg border border-warm bg-white focus:outline-none focus:border-rosegold">
+                                        <option value="M">M (65 to 85 kg)</option>
+                                        <option value="L">L (85 to 110 kg)</option>
+                                        <option value="Big size">Big size</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-navy mb-1">Price (EGP) *</label>
+                                    <input type="number" id="p-price" required class="w-full p-2.5 rounded-lg border border-warm bg-white focus:outline-none focus:border-rosegold" placeholder="850">
+                                </div>
                             </div>
                             <div>
-                                <label class="block font-bold text-navy mb-1">Category *</label>
-                                <select id="p-cat" required class="w-full p-2.5 rounded-lg border border-warm bg-white focus:outline-none focus:border-rosegold">
-                                    <option value="pajamas">Pajamas</option>
-                                    <option value="jumpsuit-blanket">Jumpsuit & Blanket</option>
-                                    <option value="new-collection">New Collection</option>
-                                </select>
+                                <label class="block font-bold text-navy mb-1">Product Description *</label>
+                                <textarea id="p-desc" required rows="3" class="w-full p-3 rounded-lg border border-warm bg-white focus:outline-none focus:border-rosegold" placeholder="Write fabric details, fit, comfort notes..."></textarea>
                             </div>
                             <div>
-                                <label class="block font-bold text-navy mb-1">Size Option *</label>
-                                <select id="p-size" required class="w-full p-2.5 rounded-lg border border-warm bg-white focus:outline-none focus:border-rosegold">
-                                    <option value="M">M (65 to 85 kg)</option>
-                                    <option value="L">L (85 to 110 kg)</option>
-                                    <option value="Big size">Big size</option>
-                                </select>
+                                <label class="block font-bold text-navy mb-1">Images Links (Put each link on a new line or separate with commas) *</label>
+                                <textarea id="p-imgs" required rows="3" class="w-full p-3 rounded-lg border border-warm bg-white focus:outline-none focus:border-rosegold font-mono text-[11px]" placeholder="https://link1.com/img1.jpg&#10;https://link2.com/img2.jpg"></textarea>
                             </div>
-                            <div>
-                                <label class="block font-bold text-navy mb-1">Price (EGP) *</label>
-                                <input type="number" id="p-price" required class="w-full p-2.5 rounded-lg border border-warm bg-white focus:outline-none focus:border-rosegold" placeholder="e.g., 850">
-                            </div>
-                            <div class="sm:col-span-2">
-                                <label class="block font-bold text-navy mb-1">Image Direct URL *</label>
-                                <input type="url" id="p-img" required class="w-full p-2.5 rounded-lg border border-warm bg-white focus:outline-none focus:border-rosegold" placeholder="https://image-link.com/photo.jpg">
-                            </div>
-                            <div class="sm:col-span-3">
-                                <button type="submit" class="w-full py-3 bg-rosegold text-white font-bold rounded-xl uppercase tracking-widest cursor-pointer">Publish Product Live</button>
-                            </div>
+                            <button type="submit" class="w-full py-3 bg-rosegold text-white font-bold rounded-xl uppercase tracking-widest cursor-pointer shadow-md">Publish Product Live</button>
                         </form>
                     </div>
 
-                    <!-- Section 3: Manage Existing Products -->
+                    <!-- Section 3: Manage Products -->
                     <div class="bg-sand-light p-6 rounded-2xl border border-warm/60 shadow-md space-y-4">
                         <h3 class="font-serif text-lg font-bold text-navy border-b pb-2">3. Manage Existing Products (${window.products.length})</h3>
                         <div class="space-y-3 max-h-96 overflow-y-auto">
                             ${productRows.length > 0 ? productRows : '<p class="text-xs text-navy/60 text-center py-6">No products added yet.</p>'}
                         </div>
                     </div>
+
+                    <!-- Section 4: Customer Orders -->
+                    <div class="bg-sand-light p-6 rounded-2xl border border-warm/60 shadow-md space-y-4">
+                        <h3 class="font-serif text-lg font-bold text-navy border-b pb-2">4. Customer Orders (${(window.orders || []).length})</h3>
+                        <div class="space-y-3 max-h-96 overflow-y-auto">
+                            ${orderRows.length > 0 ? orderRows : '<p class="text-xs text-navy/60 text-center py-6">No orders placed yet.</p>'}
+                        </div>
+                    </div>
                 </section>
             `;
-        };
+        }
 
         window.handleUpdateCovers = async function(e) {
             e.preventDefault();
             try {
                 const updatedCovers = {
                     'pajamas': document.getElementById('cov-pajamas').value,
-                    'jumpsuit-blanket': 'https://divahome-store.github.io/DivaHome/IMG_0663.jpeg',
+                    'jumpsuit-blanket': document.getElementById('cov-jumpsuit').value || 'https://divahome-store.github.io/DivaHome/IMG_0663.jpeg',
                     'new-collection': document.getElementById('cov-new').value
                 };
-                localStorage.setItem('diva_cached_covers', JSON.stringify(updatedCovers));
                 window.categoryCovers = updatedCovers;
                 await setDoc(doc(db, 'store_settings', 'covers'), updatedCovers);
-                alert('✅ Category covers updated live for all customers!');
+                showToast('✅ Category covers updated live for all customers!');
             } catch (err) {
-                alert('Error: ' + err.message);
+                showToast('Error: ' + err.message);
             }
         };
 
@@ -601,56 +994,192 @@
                 const category = document.getElementById('p-cat').value;
                 const size = document.getElementById('p-size').value;
                 const price = Number(document.getElementById('p-price').value);
-                const img = document.getElementById('p-img').value;
+                const description = document.getElementById('p-desc').value.trim();
+                const rawImgs = document.getElementById('p-imgs').value;
+                
+                const images = rawImgs.split(/[\n,]+/).map(s => s.trim()).filter(s => s.length > 0);
 
                 await addDoc(collection(db, 'products'), {
-                    title,
-                    category,
-                    size,
-                    price,
-                    img,
-                    createdAt: Date.now()
+                    title, category, size, price, description, images, img: images[0] || '', soldOut: false, createdAt: Date.now()
                 });
 
-                alert('✅ Product published live for everyone!');
+                showToast('✅ Product published live with description & photos!');
                 document.getElementById('product-form').reset();
-                renderFullAdminDashboard();
+                renderFullAdminDashboardInternal();
             } catch (err) {
-                alert('Error: ' + err.message);
+                showToast('Error: ' + err.message);
             }
         };
 
-        window.deleteProduct = async function(id) {
-            if (!confirm('Delete this product permanently?')) return;
+        window.toggleSoldOut = async function(id, currentState) {
             try {
-                await deleteDoc(doc(db, 'products', id));
-                alert('🗑️ Product deleted!');
+                await updateDoc(doc(db, 'products', id), {
+                    soldOut: !currentState
+                });
+                showToast(!currentState ? '🚫 Marked as Sold Out!' : '✅ Marked as Available!');
             } catch (err) {
-                alert('Error: ' + err.message);
+                showToast('Error: ' + err.message);
             }
         };
 
-        window.addToCart = function(id) {
-            const prod = window.products.find(p => p.id === id);
-            if (!prod) return;
-            window.cart.push(prod);
-            updateCartUI();
+        window.deleteProduct = function(id) {
+            showConfirmModal('Delete this product permanently?', async () => {
+                try {
+                    await deleteDoc(doc(db, 'products', id));
+                    showToast('🗑️ Product deleted!');
+                } catch (err) {
+                    showToast('Error: ' + err.message);
+                }
+            });
+        };
+
+        window.calculateCartTotals = function() {
+            const count = window.cart.length;
+            const subtotal = window.cart.reduce((sum, item) => sum + item.price, 0);
+            const hasDiscount = count >= 3;
+            const discountAmount = hasDiscount ? Math.round(subtotal * 0.10) : 0;
+            const productsNetTotal = subtotal - discountAmount;
+            const hasGift = count > 5;
+            const freeShipping = productsNetTotal >= 1500 || subtotal >= 1500;
+
+            const govSelect = document.getElementById('cust-gov');
+            let governorate = '';
+            let baseShippingFee = 0;
+            if (govSelect && govSelect.selectedIndex > 0) {
+                const selectedOption = govSelect.options[govSelect.selectedIndex];
+                governorate = selectedOption.value;
+                baseShippingFee = Number(selectedOption.getAttribute('data-fee') || 0);
+            }
+
+            const shippingFee = freeShipping ? 0 : baseShippingFee;
+            const finalInvoiceTotal = productsNetTotal + shippingFee;
+
+            return {
+                count,
+                subtotal,
+                hasDiscount,
+                discountAmount,
+                productsNetTotal,
+                hasGift,
+                freeShipping,
+                governorate,
+                baseShippingFee,
+                shippingFee,
+                finalInvoiceTotal
+            };
         };
 
         window.updateCartUI = function() {
-            document.getElementById('cart-badge').innerText = window.cart.length;
-            document.getElementById('cart-badge').style.opacity = window.cart.length > 0 ? '1' : '0';
+            const stats = calculateCartTotals();
+            document.getElementById('cart-badge').innerText = stats.count;
+            document.getElementById('cart-badge').style.opacity = stats.count > 0 ? '1' : '0';
+
+            // Update Floating Bottom Bar
+            const floatingBar = document.getElementById('floating-cart-bar');
+            if (stats.count > 0 && window.currentView !== 'admin') {
+                floatingBar.classList.remove('hidden');
+                document.getElementById('floating-cart-count').innerText = stats.count;
+                document.getElementById('floating-cart-total').innerText = stats.productsNetTotal + ' EGP';
+                document.getElementById('floating-cart-label').innerText = i18n[window.currentLang].viewBasket;
+                
+                let promoHints = [];
+                if (stats.hasDiscount) promoHints.push('10% OFF');
+                if (stats.hasGift) promoHints.push('+ Free Gift 🎁');
+                if (stats.freeShipping) promoHints.push('+ Free Shipping 🚚');
+                document.getElementById('floating-cart-promo').innerText = promoHints.length > 0 ? promoHints.join(' ') : `${3 - stats.count} more for 10% OFF`;
+            } else {
+                floatingBar.classList.add('hidden');
+            }
+
+            // Update Promos Banner inside Cart Drawer
+            const promosBanner = document.getElementById('cart-promos-banner');
+            let bannerLines = [];
+            if (stats.count < 3) {
+                bannerLines.push(`✨ Add <strong>${3 - stats.count}</strong> more item(s) to unlock <strong>10% OFF</strong>!`);
+            } else {
+                bannerLines.push(`✅ <strong>10% Bundle Discount</strong> unlocked!`);
+            }
+            if (stats.count <= 5) {
+                bannerLines.push(`🎁 Add <strong>${6 - stats.count}</strong> more item(s) for a <strong>Free Gift</strong> from our page!`);
+            } else {
+                bannerLines.push(`🎉 <strong>Free Gift</strong> from our page unlocked!`);
+            }
+            if (!stats.freeShipping) {
+                bannerLines.push(`🚚 Spend <strong>${1500 - stats.productsNetTotal} EGP</strong> more for <strong>Free Shipping</strong>!`);
+            } else {
+                bannerLines.push(`🚚 <strong>Free Shipping</strong> unlocked!`);
+            }
+            promosBanner.innerHTML = bannerLines.map(l => `<p>${l}</p>`).join('');
+
             const container = document.getElementById('cart-items-container');
-            let total = 0;
-            container.innerHTML = window.cart.map(item => {
-                total += item.price;
-                return `<div class="flex items-center justify-between border-b pb-2"><span class="text-xs font-bold">${item.title} ${item.size ? '(' + item.size + ')' : ''}</span><span class="text-xs text-rosegold">${item.price} EGP</span></div>`;
+            container.innerHTML = window.cart.map((item, idx) => {
+                return `
+                    <div class="flex items-center justify-between border-b border-warm/40 pb-2">
+                        <div class="flex items-center gap-2">
+                            <img src="${item.img}" class="w-10 h-10 object-cover rounded-md pointer-events-none">
+                            <div>
+                                <span class="text-xs font-bold block text-navy">${item.title}</span>
+                                <span class="text-[10px] text-rosegold">${item.size ? 'Size: ' + item.size + ' | ' : ''}${item.price} EGP</span>
+                            </div>
+                        </div>
+                        <button type="button" onclick="removeFromCart(${idx})" class="text-red-500 hover:text-red-700 text-xs font-bold cursor-pointer">✕</button>
+                    </div>
+                `;
             }).join('');
-            document.getElementById('cart-subtotal').innerText = total + ' EGP';
-            document.getElementById('co-total').innerText = total + ' EGP';
+
+            document.getElementById('cart-subtotal').innerText = stats.subtotal + ' EGP';
+            
+            const discRow = document.getElementById('cart-discount-row');
+            if (stats.hasDiscount) {
+                discRow.classList.remove('hidden');
+                document.getElementById('cart-discount').innerText = '-' + stats.discountAmount + ' EGP';
+            } else {
+                discRow.classList.add('hidden');
+            }
+
+            const giftRow = document.getElementById('cart-gift-row');
+            if (stats.hasGift) giftRow.classList.remove('hidden');
+            else giftRow.classList.add('hidden');
+
+            document.getElementById('cart-shipping-status').innerText = stats.freeShipping ? 'FREE 🎉' : (stats.governorate ? stats.shippingFee + ' EGP' : 'Select governorate at checkout');
+            document.getElementById('cart-shipping-status').className = stats.freeShipping ? 'text-green-700 font-bold' : '';
+            document.getElementById('cart-final-total').innerText = stats.productsNetTotal + ' EGP';
+
+            // Update Checkout Modal Summary
+            document.getElementById('co-subtotal').innerText = stats.subtotal + ' EGP';
+            const coDiscRow = document.getElementById('co-discount-row');
+            if (stats.hasDiscount) {
+                coDiscRow.classList.remove('hidden');
+                document.getElementById('co-discount').innerText = '-' + stats.discountAmount + ' EGP';
+            } else {
+                coDiscRow.classList.add('hidden');
+            }
+            const coGiftRow = document.getElementById('co-gift-row');
+            if (stats.hasGift) coGiftRow.classList.remove('hidden');
+            else coGiftRow.classList.add('hidden');
+            
+            const coShipEl = document.getElementById('co-shipping');
+            if (stats.freeShipping) {
+                coShipEl.innerText = 'FREE Shipping 🎉 (0 EGP)';
+                coShipEl.className = 'text-green-700 font-bold';
+            } else if (stats.governorate) {
+                coShipEl.innerText = stats.shippingFee + ' EGP';
+                coShipEl.className = 'text-navy font-bold';
+            } else {
+                coShipEl.innerText = 'Select Governorate above';
+                coShipEl.className = 'text-rosegold font-semibold';
+            }
+
+            document.getElementById('co-total').innerText = stats.finalInvoiceTotal + ' EGP';
+        };
+
+        window.removeFromCart = function(idx) {
+            window.cart.splice(idx, 1);
+            updateCartUI();
         };
 
         window.openCartDrawer = function() {
+            updateCartUI();
             document.getElementById('cart-drawer').classList.remove('translate-x-full');
             document.getElementById('cart-drawer-backdrop').classList.remove('hidden');
         };
@@ -659,37 +1188,90 @@
             document.getElementById('cart-drawer-backdrop').classList.add('hidden');
         };
         window.openCheckoutModal = function() {
+            if (window.cart.length === 0) {
+                showToast('Your bag is empty.');
+                return;
+            }
             closeCartDrawer();
+            updateCartUI();
             document.getElementById('checkout-modal').classList.remove('hidden');
         };
         window.closeCheckoutModal = function() {
             document.getElementById('checkout-modal').classList.add('hidden');
         };
-        window.handlePlaceOrder = function(e) {
+
+        window.handlePlaceOrder = async function(e) {
             e.preventDefault();
-            alert('🎉 Order placed successfully!');
-            window.cart = [];
-            updateCartUI();
-            closeCheckoutModal();
+            try {
+                const name = document.getElementById('cust-name').value.trim();
+                if (name.split(/\s+/).length < 2) {
+                    showToast(window.currentLang === 'ar' ? 'برجاء إدخال الاسم ثنائي على الأقل' : 'Please enter your full name (First & Last name).');
+                    return;
+                }
+                const phone = document.getElementById('cust-phone').value.trim();
+                const altPhone = document.getElementById('cust-alt-phone').value.trim();
+                const whatsapp = document.getElementById('cust-whatsapp').value.trim();
+                const address = document.getElementById('cust-address').value.trim();
+                const stats = calculateCartTotals();
+
+                if (!stats.governorate) {
+                    showToast(window.currentLang === 'ar' ? 'برجاء اختيار المحافظة' : 'Please select your governorate.');
+                    return;
+                }
+
+                await addDoc(collection(db, 'orders'), {
+                    name,
+                    phone,
+                    altPhone,
+                    whatsapp,
+                    governorate: stats.governorate,
+                    shippingFee: stats.shippingFee,
+                    address,
+                    items: window.cart,
+                    subtotal: stats.subtotal,
+                    hasDiscount: stats.hasDiscount,
+                    discountAmount: stats.discountAmount,
+                    hasGift: stats.hasGift,
+                    freeShipping: stats.freeShipping,
+                    total: stats.finalInvoiceTotal,
+                    createdAt: Date.now()
+                });
+
+                showToast('🎉 Order placed successfully!');
+                window.cart = [];
+                document.getElementById('cust-gov').selectedIndex = 0;
+                updateCartUI();
+                closeCheckoutModal();
+            } catch (err) {
+                showToast('Error: ' + err.message);
+            }
         };
+
         window.toggleMobileMenu = function() {
             document.getElementById('mobile-menu').classList.toggle('hidden');
         };
+
         window.toggleLanguage = function() {
             window.currentLang = window.currentLang === 'en' ? 'ar' : 'en';
             document.documentElement.lang = window.currentLang;
             document.documentElement.dir = window.currentLang === 'ar' ? 'rtl' : 'ltr';
             document.getElementById('lang-btn-text').innerText = window.currentLang === 'en' ? 'عربي' : 'EN';
-            if (window.currentCategory === 'all') {
-                showHomeView();
-            } else if (window.currentCategory === 'admin') {
-                renderFullAdminDashboard();
-            } else {
-                renderProductsGrid();
+            if (window.currentView === 'home') {
+                renderHomeViewInternal();
+            } else if (window.currentView === 'category') {
+                renderProductsGridInternal();
+            } else if (window.currentView === 'product' && window.currentProductId) {
+                renderProductDetailInternal(window.currentProductId);
+            } else if (window.currentView === 'admin') {
+                renderFullAdminDashboardInternal();
             }
         };
 
-        window.onload = function() { showHomeView(); };
+        window.onload = function() { 
+            navigateToState({ view: 'home' }, true);
+            updateCartUI();
+            renderHomeViewInternal(); 
+        };
     </script>
 </body>
 </html>
