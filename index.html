@@ -12,15 +12,15 @@
             theme: {
                 extend: {
                     colors: {
-                        navy: '#131B2A',
-                        'navy-light': '#1E293B',
-                        rosegold: '#B87860',
-                        'rosegold-light': '#D4A391',
-                        sand: '#F7EFEF',
-                        'sand-light': '#FFFFFF',
-                        warm: '#E8D4CC',
-                        beige: '#F5E6E0',
-                        velvet: '#E8B4B8'
+                        navy: '#FBE8EE',
+                        'navy-light': '#F6DCE5',
+                        rosegold: '#A82652',
+                        'rosegold-light': '#BE3462',
+                        sand: '#F7E3EA',
+                        'sand-light': '#FBEAF0',
+                        warm: '#E5B8C7',
+                        beige: '#F4D5DF',
+                        velvet: '#ECC2D1'
                     },
                     fontFamily: {
                         serif: ['Playfair Display', 'Georgia', 'serif'],
@@ -39,8 +39,8 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #FAF4F4;
-            color: #131B2A;
+            background-color: #F7E3EA;
+            color: #9E1F4A;
             margin: 0;
             padding: 0;
             -webkit-user-select: none;
@@ -48,6 +48,85 @@
             -ms-user-select: none;
             user-select: none;
             -webkit-touch-callout: none;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+        body:not(.dark-pink-mode) .text-navy,
+        body:not(.dark-pink-mode) .text-navy\/70,
+        body:not(.dark-pink-mode) .text-navy\/75,
+        body:not(.dark-pink-mode) .text-navy\/80,
+        body:not(.dark-pink-mode) .text-navy\/85,
+        body:not(.dark-pink-mode) .text-navy\/60,
+        body:not(.dark-pink-mode) .text-navy\/50,
+        body:not(.dark-pink-mode) .text-navy\/40,
+        body:not(.dark-pink-mode) .text-rosegold,
+        body:not(.dark-pink-mode) .text-rosegold-light,
+        body:not(.dark-pink-mode) .text-sand,
+        body:not(.dark-pink-mode) .text-sand\/70,
+        body:not(.dark-pink-mode) .text-sand\/50 {
+            color: #9E1F4A !important;
+        }
+        body:not(.dark-pink-mode) .bg-navy .text-sand,
+        body:not(.dark-pink-mode) .bg-navy {
+            color: #9E1F4A !important;
+        }
+        body:not(.dark-pink-mode) input,
+        body:not(.dark-pink-mode) select,
+        body:not(.dark-pink-mode) textarea {
+            background-color: #FBEAF0 !important;
+            color: #9E1F4A !important;
+            border-color: #DFACBD !important;
+        }
+        body:not(.dark-pink-mode) input::placeholder,
+        body:not(.dark-pink-mode) textarea::placeholder {
+            color: rgba(158, 31, 74, 0.65) !important;
+        }
+        body.dark-pink-mode {
+            background-color: #0B090C;
+            color: #FF8FB1;
+        }
+        body.dark-pink-mode .bg-sand { background-color: #0B090C !important; }
+        body.dark-pink-mode .bg-sand-light { background-color: #161015 !important; }
+        body.dark-pink-mode .bg-beige { background-color: #1F151D !important; }
+        body.dark-pink-mode .bg-navy { background-color: #120B10 !important; color: #FF9EBB !important; }
+        body.dark-pink-mode .bg-navy-light { background-color: #1D121A !important; }
+        body.dark-pink-mode header,
+        body.dark-pink-mode header .bg-sand-light\/95 {
+            background-color: #140D12 !important;
+            border-color: rgba(255, 143, 177, 0.25) !important;
+        }
+        body.dark-pink-mode header button,
+        body.dark-pink-mode header a {
+            color: #FF9EBB !important;
+        }
+        body.dark-pink-mode header .bg-beige {
+            background-color: #241620 !important;
+            border-color: rgba(255, 143, 177, 0.35) !important;
+        }
+        body.dark-pink-mode .text-navy,
+        body.dark-pink-mode .text-sand,
+        body.dark-pink-mode .text-rosegold,
+        body.dark-pink-mode .text-rosegold-light { color: #FF8FB1 !important; }
+        body.dark-pink-mode .text-navy\/70,
+        body.dark-pink-mode .text-sand\/70 { color: rgba(255, 143, 177, 0.82) !important; }
+        body.dark-pink-mode .text-navy\/75 { color: rgba(255, 143, 177, 0.86) !important; }
+        body.dark-pink-mode .text-navy\/80 { color: rgba(255, 143, 177, 0.9) !important; }
+        body.dark-pink-mode .text-navy\/85 { color: rgba(255, 143, 177, 0.94) !important; }
+        body.dark-pink-mode .text-navy\/60 { color: rgba(255, 143, 177, 0.74) !important; }
+        body.dark-pink-mode .text-navy\/50,
+        body.dark-pink-mode .text-sand\/50 { color: rgba(255, 143, 177, 0.64) !important; }
+        body.dark-pink-mode .text-navy\/40 { color: rgba(255, 143, 177, 0.56) !important; }
+        body.dark-pink-mode .border-warm { border-color: #3A2230 !important; }
+        body.dark-pink-mode .border-warm\/20 { border-color: rgba(255, 105, 150, 0.16) !important; }
+        body.dark-pink-mode .border-warm\/30 { border-color: rgba(255, 105, 150, 0.22) !important; }
+        body.dark-pink-mode .border-warm\/40 { border-color: rgba(255, 105, 150, 0.26) !important; }
+        body.dark-pink-mode .border-warm\/50 { border-color: rgba(255, 105, 150, 0.32) !important; }
+        body.dark-pink-mode .border-warm\/60 { border-color: rgba(255, 105, 150, 0.38) !important; }
+        body.dark-pink-mode input,
+        body.dark-pink-mode select,
+        body.dark-pink-mode textarea {
+            background-color: #140E13 !important;
+            color: #FF8FB1 !important;
+            border-color: #462738 !important;
         }
         .font-serif {
             font-family: 'Playfair Display', Georgia, serif;
@@ -82,7 +161,7 @@
 
     <!-- Main Navigation Header -->
     <header class="sticky top-0 z-40 bg-sand-light/95 backdrop-blur-md border-b border-warm/40 shadow-xs relative">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
+        <div dir="ltr" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
             
             <!-- Mobile Menu Toggle & Left Nav -->
             <div class="flex items-center gap-3">
@@ -102,16 +181,17 @@
                 <h1 class="font-serif text-xl sm:text-2xl lg:text-3xl font-bold tracking-[0.25em] text-navy uppercase leading-none group-hover:text-rosegold transition-colors pointer-events-none">
                     DIVA HOME
                 </h1>
-                <span class="text-[9px] uppercase tracking-[0.3em] text-rosegold font-bold mt-1 pointer-events-none">EST. 2026</span>
-            </div>
-
-            <!-- Right Controls: Language & Cart -->
-            <div class="flex items-center gap-2 sm:gap-3">
-                <button type="button" onclick="toggleLanguage()" class="w-14 sm:w-18 py-1.5 rounded-lg border border-rosegold/30 bg-beige text-navy text-[11px] font-bold hover:bg-rosegold hover:text-white transition-all shadow-xs cursor-pointer text-center">
-                    <span id="lang-btn-text">عربي</span>
+            <!-- Right Controls: Dark Mode, Language & Cart -->
+            <div class="flex items-center gap-1.5 sm:gap-2.5">
+                <button type="button" onclick="toggleDarkPinkMode()" class="p-2 rounded-lg border-2 border-rosegold/70 bg-rosegold/20 text-navy hover:bg-rosegold hover:text-white transition-all shadow-sm cursor-pointer flex items-center justify-center shrink-0" aria-label="Toggle Dark Mode" title="Dark Mode">
+                    <span id="theme-icon-btn" class="text-xs sm:text-sm leading-none pointer-events-none">🌙</span>
                 </button>
 
-                <button type="button" onclick="openCartDrawer()" class="relative p-2 text-navy hover:text-rosegold transition-colors cursor-pointer" aria-label="Cart">
+                <button type="button" onclick="toggleLanguage()" class="w-16 sm:w-18 py-1.5 rounded-lg border-2 border-rosegold/70 bg-rosegold/20 text-navy text-[11px] font-bold hover:bg-rosegold hover:text-white transition-all shadow-sm cursor-pointer text-center shrink-0 select-none">
+                    <span id="lang-btn-text" class="pointer-events-none inline-block">عربي</span>
+                </button>
+
+                <button type="button" onclick="openCartDrawer()" class="relative p-2 text-navy hover:text-rosegold transition-colors cursor-pointer shrink-0" aria-label="Cart">
                     <svg class="w-6 h-6 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
                     <span id="cart-badge" class="absolute top-0 right-0 bg-rosegold text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold opacity-0 transition-opacity shadow-xs">0</span>
                 </button>
@@ -487,8 +567,8 @@
                 heroHeadline: "Make evenings feel a little softer.",
                 heroSubtext: "Meet Diva Home: sleepwear for winding down, slowing the day, and making room for a little comfort in your everyday ritual.",
                 pajamaDesc: "All-season soft sleepwear sets designed for your everyday comfort ritual.",
-                jumpsuitDesc: "Trendy cozy plush wearable blankets & character jumpsuits.",
-                newDesc: "Discover our latest seasonal releases & exclusive lounge designs.",
+                jumpsuitDesc: "Trendy cozy jumpsuits and wearable blankets designed to be worn comfortably.",
+                newDesc: "Discover our newest products and fresh arrivals crafted for cozy evenings.",
                 viewDetails: "View Product",
                 soldOut: "Sold Out",
                 noCover: "No Image Set Yet. Add from Admin Dashboard!",
@@ -501,14 +581,27 @@
                 backBtn: "Back",
                 productDescTitle: "Product Description",
                 noDescription: "Luxurious, ultra-soft fabric crafted for maximum comfort and elegance at home.",
-                addToBag: "Add to Bag 🛍️"
+                addToBag: "Add to Bag 🛍️",
+                selectedCountLabel: (n) => `${n} in bag`,
+                qtyBadgeLabel: (n) => `Qty: ${n}`,
+                feelingTitle: "THE DIVA HOME FEELING",
+                feelingSubtitle: "A softer routine, your way. Start with what sounds good tonight. We can help you find the rest.",
+                step1Num: "01",
+                step1Title: "Pick your pace",
+                step1Desc: "Browse relaxed sleep sets and blanket wear & jumpsuits for slower nights.",
+                step2Num: "02",
+                step2Title: "Find your favorite",
+                step2Desc: "Ask about available styles, sizes, and the details that matter to you.",
+                step3Num: "03",
+                step3Title: "Make it a moment",
+                step3Desc: "Explore current offers and make a little room for comfort at home."
             },
             ar: {
                 heroHeadline: "اجعلي أمسياتكِ أكثر نعومة وراحة.",
                 heroSubtext: "اكتشفي ديفا هوم: ملابس نوم مصممة للاسترخاء وإعادة الهدوء ليومكِ وتوفير الراحة المثالية لروتينكِ اليومي.",
                 pajamaDesc: "تشكيلة ملابس نوم مريحة وناعمة تناسب جميع فصول السنة.",
-                jumpsuitDesc: "الجامبسوت الشتوي الأكثر طلباً مع بطانيات مفروشة مريحة ودافئة.",
-                newDesc: "اكتشفي أحدث صيحات الموضة المنزلية والتصاميم الحصرية.",
+                jumpsuitDesc: "جامبسوت مريح مع بلانكيت عملية تُلبس وتُرتدى بسهولة لدفء وراحة مثالية.",
+                newDesc: "تضم هذه التقسيمة أحدث منتجاتنا الجديدة التي أضفناها لتجربة منزلية مميزة.",
                 viewDetails: "عرض المنتج",
                 soldOut: "نفدت الكمية",
                 noCover: "لم تقمي بإضافة صورة بعد. يمكنك إضافتها من لوحة الإدارة!",
@@ -521,8 +614,58 @@
                 backBtn: "رجوع",
                 productDescTitle: "وصف المنتج",
                 noDescription: "خامة فاخرة وناعمة جداً مصممة لتمنحكِ أقصى درجات الراحة والأناقة في المنزل.",
-                addToBag: "إضافة للسلة 🛍️"
+                addToBag: "إضافة للسلة 🛍️",
+                selectedCountLabel: (n) => `مختار ${n} في السلة`,
+                qtyBadgeLabel: (n) => `العدد: ${n}`,
+                feelingTitle: "إحساس ديفا هوم",
+                feelingSubtitle: "روتين أهدأ وأكثر نعومة على طريقتكِ. ابدئي بما يناسب ليلتكِ، وسنساعدكِ في إيجاد الراحة التي تبحثين عنها.",
+                step1Num: "01",
+                step1Title: "اختاري إيقاعكِ",
+                step1Desc: "تصفحي أطقم النوم المريحة والبلانكيت والجامبسوت لأمسيات أكثر هدوءاً.",
+                step2Num: "02",
+                step2Title: "اعثري على المفضل لديكِ",
+                step2Desc: "استكشفي الموديلات المتاحة والمقاسات والتفاصيل التي تهمكِ.",
+                step3Num: "03",
+                step3Title: "اجعليها لحظة مميزة",
+                step3Desc: "اكتشفي العروض الحالية ووفّري مساحة صغيرة للراحة في منزلكِ."
             }
+        };
+
+        window.getProductCartCount = function(productId) {
+            return window.cart.filter(item => item.id === productId).length;
+        };
+
+        window.renderProductCardControls = function(item) {
+            const isSoldOut = Boolean(item.soldOut);
+            if (isSoldOut) {
+                return `
+                    <button type="button" disabled onclick="event.stopPropagation()" class="w-full py-2.5 rounded-xl bg-gray-400 text-white text-xs font-bold uppercase tracking-wider cursor-not-allowed">
+                        ${i18n[window.currentLang].soldOut}
+                    </button>
+                `;
+            }
+
+            const count = getProductCartCount(item.id);
+            if (count === 0) {
+                return `
+                    <button type="button" onclick="event.stopPropagation(); addProductToCartById('${item.id}')" class="w-full py-2.5 rounded-xl bg-navy hover:bg-rosegold text-sand text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-xs">
+                        ${i18n[window.currentLang].addToBag}
+                    </button>
+                `;
+            }
+
+            return `
+                <div onclick="event.stopPropagation()" class="space-y-2">
+                    <div class="flex items-center justify-between bg-beige/90 border border-rosegold/40 rounded-xl px-2.5 py-1.5">
+                        <span class="text-[11px] font-bold text-rosegold">${i18n[window.currentLang].selectedCountLabel(count)}</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="removeOneProductById('${item.id}')" class="w-6 h-6 rounded-lg bg-sand-light border border-warm text-navy hover:bg-rosegold hover:text-white font-bold text-xs flex items-center justify-center cursor-pointer transition-colors">-</button>
+                            <span class="text-xs font-bold text-navy min-w-[14px] text-center">${count}</span>
+                            <button type="button" onclick="addProductToCartById('${item.id}')" class="w-6 h-6 rounded-lg bg-navy hover:bg-rosegold text-sand font-bold text-xs flex items-center justify-center cursor-pointer transition-colors">+</button>
+                        </div>
+                    </div>
+                </div>
+            `;
         };
 
         window.showHomeView = function() {
@@ -590,6 +733,50 @@
                                 <p class="text-xs text-navy/70 leading-relaxed mb-4">${i18n[window.currentLang].newDesc}</p>
                                 <span class="text-xs font-bold text-rosegold uppercase tracking-widest">Shop New Collection &rarr;</span>
                             </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- The Diva Home Feeling Section -->
+                <section class="max-w-3xl mx-auto px-4 sm:px-6 pt-8 pb-12 text-center space-y-8">
+                    <div class="space-y-3">
+                        <h2 class="font-serif text-2xl sm:text-3xl font-bold tracking-[0.18em] text-navy uppercase leading-snug">
+                            ${i18n[window.currentLang].feelingTitle}
+                        </h2>
+                        <p class="text-xs sm:text-sm text-navy/75 leading-relaxed max-w-xl mx-auto">
+                            ${i18n[window.currentLang].feelingSubtitle}
+                        </p>
+                    </div>
+
+                    <div class="space-y-4 text-start">
+                        <div class="bg-sand-light rounded-2xl p-5 sm:p-6 border border-warm/60 shadow-sm space-y-1.5">
+                            <h3 class="font-serif text-lg sm:text-xl font-bold text-rosegold flex items-baseline gap-2">
+                                <span>${i18n[window.currentLang].step1Num}</span>
+                                <span>${i18n[window.currentLang].step1Title}</span>
+                            </h3>
+                            <p class="text-xs sm:text-sm text-navy/75 leading-relaxed">
+                                ${i18n[window.currentLang].step1Desc}
+                            </p>
+                        </div>
+
+                        <div class="bg-sand-light rounded-2xl p-5 sm:p-6 border border-warm/60 shadow-sm space-y-1.5">
+                            <h3 class="font-serif text-lg sm:text-xl font-bold text-rosegold flex items-baseline gap-2">
+                                <span>${i18n[window.currentLang].step2Num}</span>
+                                <span>${i18n[window.currentLang].step2Title}</span>
+                            </h3>
+                            <p class="text-xs sm:text-sm text-navy/75 leading-relaxed">
+                                ${i18n[window.currentLang].step2Desc}
+                            </p>
+                        </div>
+
+                        <div class="bg-sand-light rounded-2xl p-5 sm:p-6 border border-warm/60 shadow-sm space-y-1.5">
+                            <h3 class="font-serif text-lg sm:text-xl font-bold text-rosegold flex items-baseline gap-2">
+                                <span>${i18n[window.currentLang].step3Num}</span>
+                                <span>${i18n[window.currentLang].step3Title}</span>
+                            </h3>
+                            <p class="text-xs sm:text-sm text-navy/75 leading-relaxed">
+                                ${i18n[window.currentLang].step3Desc}
+                            </p>
                         </div>
                     </div>
                 </section>
@@ -669,9 +856,12 @@
                                 <span class="text-[10px] uppercase font-bold text-rosegold">${item.category} ${item.size ? '| Size: ' + item.size : ''}</span>
                                 <h3 class="font-bold text-sm text-navy mt-1">${item.title}</h3>
                             </div>
-                            <div class="flex items-center justify-between pt-2 border-t border-warm/30">
-                                <span class="font-bold text-sm text-navy">${item.price} EGP</span>
-                                <span class="text-xs font-semibold ${isSoldOut ? 'text-red-500' : 'text-rosegold'} uppercase tracking-wider">${isSoldOut ? i18n[window.currentLang].soldOut : i18n[window.currentLang].viewDetails + ' &rarr;'}</span>
+                            <div class="space-y-2.5 pt-2 border-t border-warm/30">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-sm text-navy">${item.price} EGP</span>
+                                    <span class="text-[11px] font-semibold ${isSoldOut ? 'text-red-500' : 'text-rosegold'}">${isSoldOut ? i18n[window.currentLang].soldOut : i18n[window.currentLang].viewDetails + ' &rarr;'}</span>
+                                </div>
+                                ${renderProductCardControls(item)}
                             </div>
                         </div>
                     </div>
@@ -775,7 +965,21 @@
                         <div class="pt-2">
                             ${isSoldOut
                                 ? `<button type="button" disabled class="w-full py-4 bg-gray-400 text-white font-bold rounded-2xl text-xs uppercase tracking-widest cursor-not-allowed">${i18n[window.currentLang].soldOut}</button>`
-                                : `<button type="button" onclick="addProductToCartById('${prod.id}')" class="w-full py-4 bg-navy hover:bg-rosegold text-sand font-bold rounded-2xl text-xs sm:text-sm uppercase tracking-widest transition-all cursor-pointer shadow-lg">${i18n[window.currentLang].addToBag}</button>`
+                                : `
+                                    <div class="space-y-3">
+                                        ${getProductCartCount(prod.id) > 0 ? `
+                                            <div class="flex items-center justify-between bg-beige border border-rosegold/40 rounded-2xl px-4 py-3">
+                                                <span class="text-xs font-bold text-rosegold">${i18n[window.currentLang].selectedCountLabel(getProductCartCount(prod.id))}</span>
+                                                <div class="flex items-center gap-3">
+                                                    <button type="button" onclick="removeOneProductById('${prod.id}')" class="w-8 h-8 rounded-xl bg-sand-light border border-warm text-navy hover:bg-rosegold hover:text-white font-bold text-sm flex items-center justify-center cursor-pointer transition-colors">-</button>
+                                                    <span class="text-sm font-bold text-navy min-w-[20px] text-center">${getProductCartCount(prod.id)}</span>
+                                                    <button type="button" onclick="addProductToCartById('${prod.id}')" class="w-8 h-8 rounded-xl bg-navy hover:bg-rosegold text-sand font-bold text-sm flex items-center justify-center cursor-pointer transition-colors">+</button>
+                                                </div>
+                                            </div>
+                                        ` : ''}
+                                        <button type="button" onclick="addProductToCartById('${prod.id}')" class="w-full py-4 bg-navy hover:bg-rosegold text-sand font-bold rounded-2xl text-xs sm:text-sm uppercase tracking-widest transition-all cursor-pointer shadow-lg">${i18n[window.currentLang].addToBag}</button>
+                                    </div>
+                                `
                             }
                         </div>
                     </div>
@@ -793,20 +997,33 @@
                 cartId: Date.now() + Math.random()
             });
             updateCartUI();
+            if (window.currentView === 'category') renderProductsGridInternal();
+            else if (window.currentView === 'product' && window.currentProductId) renderProductDetailInternal(window.currentProductId);
             showToast(window.currentLang === 'ar' ? 'تمت الإضافة للسلة! اضغطي بالأسفل لإتمام الطلب' : 'Added to basket! Tap the bar below when ready.');
         };
 
-        window.handleSecretAdminTrigger = function() {
-            if (!window.isAdminLoggedIn) {
-                document.getElementById('admin-login-modal').classList.remove('hidden');
-            } else {
-                navigateToState({ view: 'admin' });
-                renderFullAdminDashboardInternal();
+        window.removeOneProductById = function(id) {
+            const idx = window.cart.findIndex(item => item.id === id);
+            if (idx !== -1) {
+                window.cart.splice(idx, 1);
+                updateCartUI();
+                if (window.currentView === 'category') renderProductsGridInternal();
+                else if (window.currentView === 'product' && window.currentProductId) renderProductDetailInternal(window.currentProductId);
             }
         };
 
         window.closeAdminLoginModal = function() {
             document.getElementById('admin-login-modal').classList.add('hidden');
+        };
+
+        window.handleSecretAdminTrigger = function() {
+            if (window.isAdminLoggedIn) {
+                navigateToState({ view: 'admin' });
+                renderFullAdminDashboardInternal();
+            } else {
+                document.getElementById('admin-pass-input').value = '';
+                document.getElementById('admin-login-modal').classList.remove('hidden');
+            }
         };
 
         window.handleAdminLogin = function(e) {
@@ -857,11 +1074,20 @@
 
             let orderRows = (window.orders || []).map((ord, idx) => {
                 const itemsList = (ord.items || []).map(i => `${i.title} (${i.size || 'N/A'}) - ${i.price} EGP`).join(', ');
+                const isDone = Boolean(ord.completed);
                 return `
-                    <div class="bg-sand p-4 rounded-xl border border-warm/40 space-y-2">
-                        <div class="flex justify-between items-center border-b border-warm/30 pb-2">
-                            <span class="font-bold text-xs text-navy">Order #${idx + 1} - ${ord.name}</span>
-                            <span class="text-xs font-bold text-rosegold">${ord.total} EGP</span>
+                    <div class="bg-sand p-4 rounded-xl border ${isDone ? 'border-emerald-500/50 opacity-85' : 'border-warm/40'} space-y-2">
+                        <div class="flex flex-wrap justify-between items-center gap-2 border-b border-warm/30 pb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-xs text-navy">Order #${idx + 1} - ${ord.name}</span>
+                                <span class="text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase ${isDone ? 'bg-emerald-600 text-white' : 'bg-rosegold/20 text-rosegold'}">${isDone ? 'Completed ✓' : 'Pending'}</span>
+                            </div>
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-xs font-bold text-rosegold">${ord.total} EGP</span>
+                                <button type="button" onclick="toggleOrderCompleted('${ord.id}', ${isDone})" class="${isDone ? 'bg-amber-600 hover:bg-amber-700' : 'bg-emerald-600 hover:bg-emerald-700'} text-white px-3 py-1 rounded-lg text-[11px] font-bold cursor-pointer transition-colors">
+                                    ${isDone ? 'Mark Pending' : 'Mark Completed ✓'}
+                                </button>
+                            </div>
                         </div>
                         <div class="text-[11px] text-navy/85 space-y-1">
                             <p><strong>Phone:</strong> <a href="tel:${ord.phone}" class="text-rosegold underline">${ord.phone}</a> ${ord.altPhone ? `| <strong>Alt Phone:</strong> ${ord.altPhone}` : ''}</p>
@@ -1022,6 +1248,25 @@
             }
         };
 
+        window.toggleOrderCompleted = async function(id, currentState) {
+            try {
+                await updateDoc(doc(db, 'orders', id), {
+                    completed: !currentState
+                });
+                showToast(!currentState ? '✅ Order marked as completed!' : '↩️ Order marked as pending!');
+            } catch (err) {
+                showToast('Error: ' + err.message);
+            }
+        };
+
+        window.toggleDarkPinkMode = function() {
+            const isDark = document.body.classList.toggle('dark-pink-mode');
+            const iconBtn = document.getElementById('theme-icon-btn');
+            if (iconBtn) {
+                iconBtn.innerText = isDark ? '☀️' : '🌙';
+            }
+        };
+
         window.deleteProduct = function(id) {
             showConfirmModal('Delete this product permanently?', async () => {
                 try {
@@ -1112,17 +1357,34 @@
             promosBanner.innerHTML = bannerLines.map(l => `<p>${l}</p>`).join('');
 
             const container = document.getElementById('cart-items-container');
-            container.innerHTML = window.cart.map((item, idx) => {
+            const groupedCart = [];
+            window.cart.forEach(item => {
+                const existing = groupedCart.find(g => g.id === item.id);
+                if (existing) {
+                    existing.qty += 1;
+                } else {
+                    groupedCart.push({ ...item, qty: 1 });
+                }
+            });
+
+            container.innerHTML = groupedCart.map((group) => {
                 return `
-                    <div class="flex items-center justify-between border-b border-warm/40 pb-2">
-                        <div class="flex items-center gap-2">
-                            <img src="${item.img}" class="w-10 h-10 object-cover rounded-md pointer-events-none">
-                            <div>
-                                <span class="text-xs font-bold block text-navy">${item.title}</span>
-                                <span class="text-[10px] text-rosegold">${item.size ? 'Size: ' + item.size + ' | ' : ''}${item.price} EGP</span>
+                    <div class="flex items-center justify-between gap-2 border-b border-warm/40 pb-3">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <img src="${group.img}" class="w-11 h-11 object-cover rounded-lg pointer-events-none shrink-0">
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <span class="text-xs font-bold text-navy truncate">${group.title}</span>
+                                    <span class="bg-rosegold text-white text-[10px] px-2 py-0.5 rounded-full font-bold">${i18n[window.currentLang].qtyBadgeLabel(group.qty)}</span>
+                                </div>
+                                <span class="text-[10px] text-rosegold font-semibold">${group.size ? 'Size: ' + group.size + ' | ' : ''}${group.price * group.qty} EGP</span>
                             </div>
                         </div>
-                        <button type="button" onclick="removeFromCart(${idx})" class="text-red-500 hover:text-red-700 text-xs font-bold cursor-pointer">✕</button>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <button type="button" onclick="removeOneProductById('${group.id}')" class="w-6 h-6 rounded-lg bg-beige border border-warm text-navy hover:bg-rosegold hover:text-white font-bold text-xs flex items-center justify-center cursor-pointer">-</button>
+                            <span class="text-xs font-bold text-navy w-4 text-center">${group.qty}</span>
+                            <button type="button" onclick="addProductToCartById('${group.id}')" class="w-6 h-6 rounded-lg bg-navy hover:bg-rosegold text-sand font-bold text-xs flex items-center justify-center cursor-pointer">+</button>
+                        </div>
                     </div>
                 `;
             }).join('');
@@ -1176,6 +1438,8 @@
         window.removeFromCart = function(idx) {
             window.cart.splice(idx, 1);
             updateCartUI();
+            if (window.currentView === 'category') renderProductsGridInternal();
+            else if (window.currentView === 'product' && window.currentProductId) renderProductDetailInternal(window.currentProductId);
         };
 
         window.openCartDrawer = function() {
@@ -1254,7 +1518,7 @@
         window.toggleLanguage = function() {
             window.currentLang = window.currentLang === 'en' ? 'ar' : 'en';
             document.documentElement.lang = window.currentLang;
-            document.documentElement.dir = window.currentLang === 'ar' ? 'rtl' : 'ltr';
+            document.body.dir = window.currentLang === 'ar' ? 'rtl' : 'ltr';
             document.getElementById('lang-btn-text').innerText = window.currentLang === 'en' ? 'عربي' : 'EN';
             if (window.currentView === 'home') {
                 renderHomeViewInternal();
