@@ -48,7 +48,21 @@
             -ms-user-select: none;
             user-select: none;
             -webkit-touch-callout: none;
-            transition: background-color 0.25s ease, color 0.25s ease;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: pan-x pan-y manipulation;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        button, a, select, [onclick] {
+            touch-action: pan-x pan-y manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .product-card-touch {
+            touch-action: pan-x pan-y;
+        }
+        .product-slider-touch {
+            touch-action: pan-x pan-y;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-x: contain;
         }
         body:not(.dark-pink-mode) .bg-navy {
             background-color: #131B2A !important;
@@ -178,7 +192,7 @@
     <div id="toast-box" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-[100] bg-navy text-sand px-5 py-3 rounded-xl shadow-2xl border border-rosegold/40 text-xs font-bold tracking-wide transition-all"></div>
 
     <!-- Custom Confirmation Modal -->
-    <div id="confirm-modal" class="hidden fixed inset-0 bg-navy/70 backdrop-blur-xs z-[100] flex items-center justify-center p-4">
+    <div id="confirm-modal" class="hidden fixed inset-0 bg-navy/70 z-[100] flex items-center justify-center p-4">
         <div class="bg-sand-light max-w-xs w-full rounded-2xl shadow-2xl border border-warm/60 p-6 space-y-4 text-center">
             <p id="confirm-text" class="text-xs font-bold text-navy"></p>
             <div class="flex gap-3 justify-center">
@@ -194,7 +208,7 @@
     </div>
 
     <!-- Main Navigation Header -->
-    <header class="sticky top-0 z-40 bg-sand-light/95 backdrop-blur-md border-b border-warm/40 shadow-xs relative">
+    <header class="sticky top-0 z-40 bg-sand-light/95 border-b border-warm/40 shadow-xs relative">
         <div dir="ltr" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
             
             <!-- Mobile Menu Toggle & Left Nav -->
@@ -299,8 +313,8 @@
     </footer>
 
     <!-- Sliding Shopping Cart Drawer -->
-    <div id="cart-drawer-backdrop" onclick="closeCartDrawer()" class="hidden fixed inset-0 bg-navy/60 backdrop-blur-xs z-50 transition-opacity"></div>
-    <div id="cart-drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-sand-light shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col">
+    <div id="cart-drawer-backdrop" onclick="closeCartDrawer()" class="hidden fixed inset-0 bg-navy/60 z-50 transition-opacity"></div>
+    <div id="cart-drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-sand-light shadow-2xl z-50 transform translate-x-full transition-transform duration-200 flex flex-col">
         <div class="p-4 sm:p-6 border-b border-warm/40 flex items-center justify-between bg-beige">
             <h3 id="cart-drawer-title" class="font-serif text-lg font-bold text-navy">Shopping Bag</h3>
             <button type="button" onclick="closeCartDrawer()" class="text-navy hover:text-rosegold text-xl font-bold cursor-pointer">&times;</button>
@@ -336,7 +350,7 @@
     </div>
 
     <!-- Admin Login Modal -->
-    <div id="admin-login-modal" class="hidden fixed inset-0 bg-navy/70 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div id="admin-login-modal" class="hidden fixed inset-0 bg-navy/70 z-50 flex items-center justify-center p-4">
         <div class="bg-sand-light max-w-sm w-full rounded-2xl shadow-2xl border border-warm/60 overflow-hidden p-6 space-y-4">
             <div class="flex justify-between items-center">
                 <h3 class="font-serif text-base font-bold text-navy">Admin Portal Login</h3>
@@ -350,7 +364,7 @@
     </div>
 
     <!-- Checkout Modal -->
-    <div id="checkout-modal" class="hidden fixed inset-0 bg-navy/70 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto">
+    <div id="checkout-modal" class="hidden fixed inset-0 bg-navy/70 z-50 flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-sand-light max-w-lg w-full rounded-2xl shadow-2xl border border-warm/60 overflow-hidden my-8">
             <div class="bg-navy text-sand p-4 flex justify-between items-center">
                 <h3 id="co-modal-title" class="font-serif text-base font-bold">Shipping & Checkout</h3>
@@ -485,7 +499,7 @@
             clearTimeout(window.toastTimer);
             window.toastTimer = setTimeout(() => {
                 box.classList.add('hidden');
-            }, 3000);
+            }, 2600);
         };
 
         window.showConfirmModal = function(text, onConfirm) {
@@ -514,12 +528,33 @@
         window.currentView = 'home';
         window.currentCategory = 'all';
         window.currentSizeFilter = 'all';
+        window.currentPriceSort = 'default';
+        window.currentPage = 1;
+        window.productsPerPage = 8;
         window.currentProductId = null;
         window.selectedProductColors = {};
+        window.selectedProductSizes = {};
         window.cart = [];
         window.isAdminLoggedIn = false;
         window.dynamicTranslationsCache = {};
         window.isTranslatingLock = false;
+
+        function parseSizesList(rawSize) {
+            if (!rawSize) return [];
+            if (Array.isArray(rawSize)) {
+                return rawSize.map(s => String(s).trim()).filter(Boolean);
+            }
+            return String(rawSize)
+                .split(/[,،/|]+/)
+                .map(s => s.trim())
+                .filter(Boolean);
+        }
+
+        function productMatchesSize(prod, targetSize) {
+            if (!targetSize || targetSize === 'all') return true;
+            const sizes = parseSizesList(prod.size);
+            return sizes.some(s => s.toLowerCase() === String(targetSize).trim().toLowerCase());
+        }
 
         window.translateTextSmart = async function(text, targetLang) {
             if (!text || typeof text !== 'string' || !text.trim()) return text || '';
@@ -537,7 +572,7 @@
 
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 3500);
+                const timeoutId = setTimeout(() => controller.abort(), 3000);
                 const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(cleanText)}`;
                 const res = await fetch(url, { signal: controller.signal });
                 clearTimeout(timeoutId);
@@ -668,7 +703,9 @@
                 window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
                 document.documentElement.scrollTop = 0;
                 document.body.scrollTop = 0;
-            } catch (e) {}
+            } catch (e) {
+                window.scrollTo(0, 0);
+            }
         }
 
         function navigateToState(state, replace = false) {
@@ -704,6 +741,7 @@
             } else if (state.view === 'category') {
                 window.currentCategory = state.category || 'pajamas';
                 window.currentSizeFilter = state.sizeFilter || 'all';
+                window.currentPage = state.page || 1;
                 renderProductsGridInternal(true);
             } else if (state.view === 'product') {
                 window.currentCategory = state.category || 'pajamas';
@@ -821,8 +859,12 @@
                 viewDetails: "View Product",
                 soldOut: "Sold Out",
                 noCover: "No Image Set Yet. Add from Admin Dashboard!",
-                filterBySize: "Filter by Size:",
+                filterBySize: "Sizes:",
                 allSizes: "All Sizes",
+                sortPriceLabel: "Sort Price:",
+                sortDefault: "Default",
+                sortPriceLowHigh: "Lowest Price",
+                sortPriceHighLow: "Highest Price",
                 sizeNoteM: "Note: This size fits weights from 65 to 85 kg.",
                 sizeNoteL: "Note: This size fits weights from 85 to 110 kg.",
                 emptyCategory: "No products found for this size or category yet.",
@@ -833,6 +875,7 @@
                 addToBag: "Add to Bag 🛍️",
                 selectedCountLabel: (n) => `${n} in bag`,
                 qtyBadgeLabel: (n) => `Qty: ${n}`,
+                selectSizeLabel: "Select Size:",
                 selectColorLabel: "Select Color:",
                 availableColorsLabel: "Available Colors:",
                 colorWord: "Color",
@@ -909,8 +952,12 @@
                 viewDetails: "عرض المنتج",
                 soldOut: "نفدت الكمية",
                 noCover: "لم تقمي بإضافة صورة بعد. يمكنك إضافتها من لوحة الإدارة!",
-                filterBySize: "تصفية حسب المقاس:",
+                filterBySize: "المقاسات:",
                 allSizes: "جميع المقاسات",
+                sortPriceLabel: "ترتيب السعر:",
+                sortDefault: "الافتراضي",
+                sortPriceLowHigh: "الأقل سعراً",
+                sortPriceHighLow: "الأعلى سعراً",
                 sizeNoteM: "ملحوظة: هذا المقاس يناسب وزن من 65 لـ 85 كجم.",
                 sizeNoteL: "ملحوظة: هذا المقاس يناسب وزن من 85 لـ 110 كجم.",
                 emptyCategory: "لا توجد منتجات في هذا المقاس أو القسم حالياً.",
@@ -921,6 +968,7 @@
                 addToBag: "إضافة للسلة 🛍️",
                 selectedCountLabel: (n) => `مختار ${n} في السلة`,
                 qtyBadgeLabel: (n) => `العدد: ${n}`,
+                selectSizeLabel: "اختاري المقاس:",
                 selectColorLabel: "اختاري اللون:",
                 availableColorsLabel: "الألوان المتاحة:",
                 colorWord: "اللون",
@@ -998,68 +1046,67 @@
             return window.selectedProductColors[item.id];
         };
 
-        window.selectProductColor = function(productId, colorName) {
-            window.selectedProductColors[productId] = colorName;
-            if (window.currentView === 'category') renderProductsGridInternal(false, true);
-            else if (window.currentView === 'product' && window.currentProductId) renderProductDetailInternal(window.currentProductId, false, true);
+        window.getSelectedSizeForProduct = function(item) {
+            const sizes = parseSizesList(item.size);
+            if (sizes.length === 0) return item.size || '';
+            if (!window.selectedProductSizes[item.id] || !sizes.includes(window.selectedProductSizes[item.id])) {
+                window.selectedProductSizes[item.id] = sizes[0];
+            }
+            return window.selectedProductSizes[item.id];
         };
 
-        window.getProductCartCount = function(productId, color = null) {
-            if (color !== null) {
-                return window.cart.filter(item => item.id === productId && (item.selectedColor || '') === (color || '')).length;
+        window.selectProductColor = function(productId, colorName) {
+            window.selectedProductColors[productId] = colorName;
+            if (window.currentView === 'product' && window.currentProductId) {
+                renderProductDetailInternal(window.currentProductId, false, true);
             }
-            return window.cart.filter(item => item.id === productId).length;
+        };
+
+        window.selectProductSize = function(productId, sizeName) {
+            window.selectedProductSizes[productId] = sizeName;
+            if (window.currentView === 'product' && window.currentProductId) {
+                renderProductDetailInternal(window.currentProductId, false, true);
+            }
+        };
+
+        window.getProductCartCount = function(productId, color = null, size = null) {
+            return window.cart.filter(item => {
+                if (item.id !== productId) return false;
+                if (color !== null && (item.selectedColor || '') !== (color || '')) return false;
+                if (size !== null && (item.selectedSize || item.size || '') !== (size || '')) return false;
+                return true;
+            }).length;
         };
 
         window.renderProductCardControls = function(item) {
             const isSoldOut = Boolean(item.soldOut);
-            const rawColors = Array.isArray(item.colors) ? item.colors : [];
-            const localizedFields = getLocalizedProductFields(item);
-            const activeColor = getSelectedColorForProduct(item);
-            const activeColorLocalized = localizedFields.colors[rawColors.indexOf(activeColor)] || activeColor;
-
-            const colorPillsHTML = rawColors.length > 0 ? `
-                <div onclick="event.stopPropagation()" class="space-y-1">
-                    <span class="text-[10px] font-bold text-navy/65 block">${i18n[window.currentLang].selectColorLabel}</span>
-                    <div class="flex flex-wrap gap-1.5">
-                        ${rawColors.map((c, idx) => {
-                            const isSelected = c === activeColor;
-                            const displayColor = localizedFields.colors[idx] || c;
-                            return `<button type="button" onclick="selectProductColor('${item.id}', '${String(c).replace(/'/g, "\\'")}')" class="px-2 py-0.5 rounded-md text-[10px] font-bold border transition-all cursor-pointer ${isSelected ? 'bg-rosegold text-white border-rosegold shadow-2xs' : 'bg-sand text-navy border-warm hover:border-rosegold'}">${displayColor}</button>`;
-                        }).join('')}
-                    </div>
-                </div>
-            ` : '';
+            const t = i18n[window.currentLang] || i18n.en;
 
             if (isSoldOut) {
                 return `
-                    ${colorPillsHTML}
-                    <button type="button" disabled onclick="event.stopPropagation()" class="w-full py-2.5 rounded-xl bg-gray-400 text-white text-xs font-bold uppercase tracking-wider cursor-not-allowed">
-                        ${i18n[window.currentLang].soldOut}
+                    <button type="button" disabled onclick="event.stopPropagation()" class="w-full py-2 rounded-xl bg-gray-400 text-white text-[11px] font-bold uppercase tracking-wider cursor-not-allowed">
+                        ${t.soldOut}
                     </button>
                 `;
             }
 
-            const count = getProductCartCount(item.id, activeColor);
-            if (count === 0) {
+            const totalInCartForProd = getProductCartCount(item.id);
+            if (totalInCartForProd === 0) {
                 return `
-                    ${colorPillsHTML}
-                    <button type="button" onclick="event.stopPropagation(); addProductToCartById('${item.id}', '${String(activeColor).replace(/'/g, "\\'")}')" class="w-full py-2.5 rounded-xl bg-navy hover:bg-rosegold text-sand text-xs font-bold uppercase tracking-wider transition-all cursor-pointer shadow-xs">
-                        ${i18n[window.currentLang].addToBag} ${activeColorLocalized ? `(${activeColorLocalized})` : ''}
+                    <button type="button" onclick="event.stopPropagation(); addProductToCartById('${item.id}')" class="w-full py-2 px-2.5 rounded-xl bg-navy hover:bg-rosegold text-sand text-[11px] font-bold transition-all cursor-pointer shadow-xs flex items-center justify-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 pointer-events-none shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                        <span class="truncate">${t.addToBag}</span>
                     </button>
                 `;
             }
 
             return `
-                ${colorPillsHTML}
-                <div onclick="event.stopPropagation()" class="space-y-2">
-                    <div class="flex items-center justify-between bg-beige/90 border border-rosegold/40 rounded-xl px-2.5 py-1.5">
-                        <span class="text-[11px] font-bold text-rosegold">${i18n[window.currentLang].selectedCountLabel(count)}</span>
-                        <div class="flex items-center gap-2">
-                            <button type="button" onclick="removeOneProductById('${item.id}', '${String(activeColor).replace(/'/g, "\\'")}')" class="w-6 h-6 rounded-lg bg-sand-light border border-warm text-navy hover:bg-rosegold hover:text-white font-bold text-xs flex items-center justify-center cursor-pointer transition-colors">-</button>
-                            <span class="text-xs font-bold text-navy min-w-[14px] text-center">${count}</span>
-                            <button type="button" onclick="addProductToCartById('${item.id}', '${String(activeColor).replace(/'/g, "\\'")}')" class="w-6 h-6 rounded-lg bg-navy hover:bg-rosegold text-sand font-bold text-xs flex items-center justify-center cursor-pointer transition-colors">+</button>
-                        </div>
+                <div onclick="event.stopPropagation()" class="flex items-center justify-between bg-beige/90 border border-rosegold/40 rounded-xl px-2 py-1">
+                    <span class="text-[10px] font-bold text-rosegold truncate">${t.selectedCountLabel(totalInCartForProd)}</span>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button type="button" onclick="removeOneProductById('${item.id}')" class="w-5 h-5 rounded-md bg-sand-light border border-warm text-navy hover:bg-rosegold hover:text-white font-bold text-xs flex items-center justify-center cursor-pointer">-</button>
+                        <span class="text-[11px] font-bold text-navy min-w-[12px] text-center">${totalInCartForProd}</span>
+                        <button type="button" onclick="addProductToCartById('${item.id}')" class="w-5 h-5 rounded-md bg-navy hover:bg-rosegold text-sand font-bold text-xs flex items-center justify-center cursor-pointer">+</button>
                     </div>
                 </div>
             `;
@@ -1081,7 +1128,7 @@
             
             const renderCoverBox = (imgUrl, altText) => {
                 if (imgUrl) {
-                    return `<img src="${imgUrl}" onerror="this.src='https://placehold.co/400x500/F7EFEF/131B2A?text=Diva+Home'" alt="${altText}" class="w-full h-auto max-h-[380px] object-contain rounded-lg pointer-events-none">`;
+                    return `<img src="${imgUrl}" onerror="this.src='https://placehold.co/400x500/F7EFEF/131B2A?text=Diva+Home'" alt="${altText}" class="w-full h-auto max-h-[380px] object-contain rounded-xl pointer-events-none">`;
                 }
                 return `<span class="text-xs text-navy/40 font-bold uppercase tracking-wider text-center p-6">${i18n[window.currentLang].noCover}</span>`;
             };
@@ -1101,34 +1148,40 @@
                 </section>
                 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div onclick="filterCategory('pajamas')" class="group cursor-pointer bg-sand-light rounded-2xl overflow-hidden shadow-xs hover:shadow-xl transition-all border border-warm/50 flex flex-col">
-                            <div class="w-full bg-sand/80 flex items-center justify-center p-4 min-h-[260px]">
+                        <div onclick="filterCategory('pajamas')" class="product-card-touch group cursor-pointer bg-beige rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all border-2 border-rosegold/40 hover:border-rosegold flex flex-col">
+                            <div class="w-full bg-warm/60 flex items-center justify-center p-4 min-h-[260px]">
                                 ${renderCoverBox(window.categoryCovers['pajamas'], i18n[window.currentLang].catPajamasTitle)}
                             </div>
-                            <div class="p-6 flex-grow flex flex-col justify-between border-t border-warm/20">
-                                <h3 class="font-serif text-xl font-bold text-navy mb-2">${i18n[window.currentLang].catPajamasTitle}</h3>
-                                <p class="text-xs text-navy/70 leading-relaxed mb-4">${i18n[window.currentLang].pajamaDesc}</p>
-                                <span class="text-xs font-bold text-rosegold uppercase tracking-widest">${i18n[window.currentLang].explorePajamas}</span>
+                            <div class="p-6 flex-grow flex flex-col justify-between bg-beige border-t border-warm/60">
+                                <div>
+                                    <h3 class="font-serif text-xl font-bold text-navy mb-2">${i18n[window.currentLang].catPajamasTitle}</h3>
+                                    <p class="text-xs text-navy/75 leading-relaxed mb-4">${i18n[window.currentLang].pajamaDesc}</p>
+                                </div>
+                                <span class="inline-flex items-center justify-between w-full px-4 py-2.5 rounded-xl bg-navy group-hover:bg-rosegold text-sand text-xs font-bold uppercase tracking-widest transition-colors shadow-xs">${i18n[window.currentLang].explorePajamas}</span>
                             </div>
                         </div>
-                        <div onclick="filterCategory('jumpsuit-blanket')" class="group cursor-pointer bg-sand-light rounded-2xl overflow-hidden shadow-xs hover:shadow-xl transition-all border border-warm/50 flex flex-col">
-                            <div class="w-full bg-sand/80 flex items-center justify-center p-4 min-h-[260px]">
+                        <div onclick="filterCategory('jumpsuit-blanket')" class="product-card-touch group cursor-pointer bg-beige rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all border-2 border-rosegold/40 hover:border-rosegold flex flex-col">
+                            <div class="w-full bg-warm/60 flex items-center justify-center p-4 min-h-[260px]">
                                 ${renderCoverBox(window.categoryCovers['jumpsuit-blanket'], i18n[window.currentLang].catJumpsuitTitle)}
                             </div>
-                            <div class="p-6 flex-grow flex flex-col justify-between border-t border-warm/20">
-                                <h3 class="font-serif text-xl font-bold text-navy mb-2">${i18n[window.currentLang].catJumpsuitTitle}</h3>
-                                <p class="text-xs text-navy/70 leading-relaxed mb-4">${i18n[window.currentLang].jumpsuitDesc}</p>
-                                <span class="text-xs font-bold text-rosegold uppercase tracking-widest">${i18n[window.currentLang].exploreJumpsuits}</span>
+                            <div class="p-6 flex-grow flex flex-col justify-between bg-beige border-t border-warm/60">
+                                <div>
+                                    <h3 class="font-serif text-xl font-bold text-navy mb-2">${i18n[window.currentLang].catJumpsuitTitle}</h3>
+                                    <p class="text-xs text-navy/75 leading-relaxed mb-4">${i18n[window.currentLang].jumpsuitDesc}</p>
+                                </div>
+                                <span class="inline-flex items-center justify-between w-full px-4 py-2.5 rounded-xl bg-navy group-hover:bg-rosegold text-sand text-xs font-bold uppercase tracking-widest transition-colors shadow-xs">${i18n[window.currentLang].exploreJumpsuits}</span>
                             </div>
                         </div>
-                        <div onclick="filterCategory('new-collection')" class="group cursor-pointer bg-sand-light rounded-2xl overflow-hidden shadow-xs hover:shadow-xl transition-all border border-warm/50 flex flex-col">
-                            <div class="w-full bg-sand/80 flex items-center justify-center p-4 min-h-[260px]">
+                        <div onclick="filterCategory('new-collection')" class="product-card-touch group cursor-pointer bg-beige rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all border-2 border-rosegold/40 hover:border-rosegold flex flex-col">
+                            <div class="w-full bg-warm/60 flex items-center justify-center p-4 min-h-[260px]">
                                 ${renderCoverBox(window.categoryCovers['new-collection'], i18n[window.currentLang].catNewTitle)}
                             </div>
-                            <div class="p-6 flex-grow flex flex-col justify-between border-t border-warm/20">
-                                <h3 class="font-serif text-xl font-bold text-navy mb-2">${i18n[window.currentLang].catNewTitle}</h3>
-                                <p class="text-xs text-navy/70 leading-relaxed mb-4">${i18n[window.currentLang].newDesc}</p>
-                                <span class="text-xs font-bold text-rosegold uppercase tracking-widest">${i18n[window.currentLang].shopNewCollection}</span>
+                            <div class="p-6 flex-grow flex flex-col justify-between bg-beige border-t border-warm/60">
+                                <div>
+                                    <h3 class="font-serif text-xl font-bold text-navy mb-2">${i18n[window.currentLang].catNewTitle}</h3>
+                                    <p class="text-xs text-navy/75 leading-relaxed mb-4">${i18n[window.currentLang].newDesc}</p>
+                                </div>
+                                <span class="inline-flex items-center justify-between w-full px-4 py-2.5 rounded-xl bg-navy group-hover:bg-rosegold text-sand text-xs font-bold uppercase tracking-widest transition-colors shadow-xs">${i18n[window.currentLang].shopNewCollection}</span>
                             </div>
                         </div>
                     </div>
@@ -1183,14 +1236,29 @@
         window.filterCategory = function(cat) {
             window.currentCategory = cat;
             window.currentSizeFilter = 'all';
-            navigateToState({ view: 'category', category: cat, sizeFilter: 'all' });
+            window.currentPriceSort = 'default';
+            window.currentPage = 1;
+            navigateToState({ view: 'category', category: cat, sizeFilter: 'all', page: 1 });
             renderProductsGridInternal(true);
         };
 
         window.filterBySize = function(size) {
             window.currentSizeFilter = size;
-            navigateToState({ view: 'category', category: window.currentCategory, sizeFilter: size }, true);
-            renderProductsGridInternal(false);
+            window.currentPage = 1;
+            navigateToState({ view: 'category', category: window.currentCategory, sizeFilter: size, page: 1 }, true);
+            renderProductsGridInternal(false, true);
+        };
+
+        window.changePriceSort = function(sortVal) {
+            window.currentPriceSort = sortVal;
+            window.currentPage = 1;
+            renderProductsGridInternal(false, true);
+        };
+
+        window.goToCategoryPage = function(pageNum) {
+            window.currentPage = pageNum;
+            navigateToState({ view: 'category', category: window.currentCategory, sizeFilter: window.currentSizeFilter, page: pageNum }, true);
+            renderProductsGridInternal(true, true);
         };
 
         function renderProductsGridInternal(shouldScroll = true, skipTranslate = false) {
@@ -1201,73 +1269,114 @@
 
             const appContainer = document.getElementById('app-view');
             if (!appContainer) return;
+            const t = i18n[window.currentLang] || i18n.en;
 
-            let filtered = window.products.filter(p => p.category === window.currentCategory);
-            
+            const categoryProducts = window.products.filter(p => p.category === window.currentCategory);
+
+            // Dynamic size banners for pajamas based strictly on sizes present in uploaded products
             let sizeFilterBar = '';
-            let activeSizeNoteBox = '';
+            const sizeMap = new Map();
+            categoryProducts.forEach(p => {
+                parseSizesList(p.size).forEach(sz => {
+                    const key = sz.toLowerCase();
+                    if (!sizeMap.has(key)) sizeMap.set(key, sz);
+                });
+            });
+            const availableSizes = Array.from(sizeMap.values());
+
+            const priceSortDropdownHTML = `
+                <div class="flex items-center gap-1.5 bg-sand-light px-2.5 py-1.5 rounded-xl border border-warm/60 ms-auto">
+                    <svg class="w-4 h-4 text-rosegold shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                    <select aria-label="${t.sortPriceLabel}" onchange="changePriceSort(this.value)" class="text-xs font-bold bg-transparent text-navy cursor-pointer focus:outline-none">
+                        <option value="default" ${window.currentPriceSort === 'default' ? 'selected' : ''}>${t.sortDefault}</option>
+                        <option value="price-asc" ${window.currentPriceSort === 'price-asc' ? 'selected' : ''}>${t.sortPriceLowHigh}</option>
+                        <option value="price-desc" ${window.currentPriceSort === 'price-desc' ? 'selected' : ''}>${t.sortPriceHighLow}</option>
+                    </select>
+                </div>
+            `;
 
             if (window.currentCategory === 'pajamas') {
-                const pajamaSizes = ['M', 'L', 'Big size'];
-                let sizeButtons = `<button type="button" onclick="filterBySize('all')" class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${window.currentSizeFilter === 'all' ? 'bg-rosegold text-white shadow-md' : 'bg-sand-light text-navy border border-warm/60 hover:bg-beige'}">${i18n[window.currentLang].allSizes}</button>`;
-                
-                pajamaSizes.forEach(sz => {
-                    const isActive = window.currentSizeFilter === sz;
+                let sizeButtons = `<button type="button" onclick="filterBySize('all')" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${window.currentSizeFilter === 'all' ? 'bg-rosegold text-white shadow-md' : 'bg-sand-light text-navy border border-warm/60 hover:bg-beige'}">${t.allSizes}</button>`;
+
+                availableSizes.forEach(sz => {
+                    const isActive = window.currentSizeFilter.toLowerCase() === sz.toLowerCase();
+                    const safeSz = String(sz).replace(/'/g, "\\'");
                     sizeButtons += `
-                        <button type="button" onclick="filterBySize('${sz}')" class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${isActive ? 'bg-rosegold text-white shadow-md' : 'bg-sand-light text-navy border border-warm/60 hover:bg-beige'}">
+                        <button type="button" onclick="filterBySize('${safeSz}')" class="px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${isActive ? 'bg-rosegold text-white shadow-md' : 'bg-sand-light text-navy border border-warm/60 hover:bg-beige'}">
                             ${sz}
                         </button>
                     `;
                 });
 
                 sizeFilterBar = `
-                    <div class="mb-6 p-4 bg-beige/60 rounded-2xl border border-warm/40 flex flex-wrap items-center gap-3">
-                        <span class="text-xs font-bold uppercase tracking-wider text-navy me-2">${i18n[window.currentLang].filterBySize}</span>
-                        ${sizeButtons}
+                    <div class="mb-5 p-3 sm:p-4 bg-beige/60 rounded-2xl border border-warm/40 flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+                            <span class="text-xs font-bold uppercase tracking-wider text-navy shrink-0">${t.filterBySize}</span>
+                            ${sizeButtons}
+                        </div>
+                        ${priceSortDropdownHTML}
                     </div>
                 `;
+            } else {
+                sizeFilterBar = `
+                    <div class="mb-5 flex items-center justify-end">
+                        ${priceSortDropdownHTML}
+                    </div>
+                `;
+            }
 
-                if (window.currentSizeFilter === 'M') {
-                    activeSizeNoteBox = `<div class="mb-6 px-4 py-3 rounded-xl bg-sand-light border-s-4 border-rosegold shadow-xs text-xs sm:text-sm font-semibold text-navy">${i18n[window.currentLang].sizeNoteM}</div>`;
-                } else if (window.currentSizeFilter === 'L') {
-                    activeSizeNoteBox = `<div class="mb-6 px-4 py-3 rounded-xl bg-sand-light border-s-4 border-rosegold shadow-xs text-xs sm:text-sm font-semibold text-navy">${i18n[window.currentLang].sizeNoteL}</div>`;
-                }
-
-                if (window.currentSizeFilter !== 'all') {
-                    filtered = filtered.filter(p => p.size && p.size.trim().toLowerCase() === window.currentSizeFilter.toLowerCase());
+            let activeSizeNoteBox = '';
+            if (window.currentCategory === 'pajamas') {
+                if (window.currentSizeFilter.toLowerCase() === 'm') {
+                    activeSizeNoteBox = `<div class="mb-5 px-4 py-3 rounded-xl bg-sand-light border-s-4 border-rosegold shadow-xs text-xs sm:text-sm font-semibold text-navy">${t.sizeNoteM}</div>`;
+                } else if (window.currentSizeFilter.toLowerCase() === 'l') {
+                    activeSizeNoteBox = `<div class="mb-5 px-4 py-3 rounded-xl bg-sand-light border-s-4 border-rosegold shadow-xs text-xs sm:text-sm font-semibold text-navy">${t.sizeNoteL}</div>`;
                 }
             }
 
+            let filtered = [...categoryProducts];
+            if (window.currentSizeFilter !== 'all') {
+                filtered = filtered.filter(p => productMatchesSize(p, window.currentSizeFilter));
+            }
+
+            if (window.currentPriceSort === 'price-asc') {
+                filtered.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
+            } else if (window.currentPriceSort === 'price-desc') {
+                filtered.sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0));
+            }
+
+            // 8 products per page pagination
+            const totalItems = filtered.length;
+            const perPage = window.productsPerPage || 8;
+            const totalPages = Math.max(1, Math.ceil(totalItems / perPage));
+            if (window.currentPage > totalPages) window.currentPage = totalPages;
+            if (window.currentPage < 1) window.currentPage = 1;
+
+            const startIdx = (window.currentPage - 1) * perPage;
+            const pageItems = filtered.slice(startIdx, startIdx + perPage);
+
             let categoryTitle = window.currentCategory === 'pajamas'
-                ? i18n[window.currentLang].catPajamasTitle
+                ? t.catPajamasTitle
                 : window.currentCategory === 'jumpsuit-blanket'
-                    ? i18n[window.currentLang].catJumpsuitTitle
+                    ? t.catJumpsuitTitle
                     : window.currentCategory === 'new-collection'
-                        ? i18n[window.currentLang].catNewTitle
+                        ? t.catNewTitle
                         : window.currentCategory.replace('-', ' ').toUpperCase();
 
-            let gridCards = filtered.map(item => {
+            let gridCards = pageItems.map(item => {
                 const imgList = (item.images && item.images.length > 0) ? item.images : [item.img || 'https://placehold.co/400x500/F7EFEF/131B2A?text=Diva'];
                 const hasMultiple = imgList.length > 1;
-                const colorsCount = (item.colors && item.colors.length > 1) ? i18n[window.currentLang].colorsCountLabel(item.colors.length) : '';
                 const isSoldOut = Boolean(item.soldOut);
                 const loc = getLocalizedProductFields(item);
-                const catLabel = item.category === 'pajamas'
-                    ? i18n[window.currentLang].catPajamasTitle
-                    : item.category === 'jumpsuit-blanket'
-                        ? i18n[window.currentLang].catJumpsuitTitle
-                        : item.category === 'new-collection'
-                            ? i18n[window.currentLang].catNewTitle
-                            : item.category;
 
                 const slidesHTML = imgList.map((src, idx) => `
                     <div class="w-full shrink-0 snap-center">
-                        <img src="${src}" onerror="this.src='https://placehold.co/400x500/F7EFEF/131B2A?text=Diva+Home'" alt="${loc.title} ${idx + 1}" class="w-full h-48 sm:h-72 lg:h-80 object-cover block pointer-events-none ${isSoldOut ? 'grayscale-[40%]' : ''}">
+                        <img src="${src}" loading="lazy" decoding="async" onerror="this.src='https://placehold.co/400x500/F7EFEF/131B2A?text=Diva+Home'" alt="${loc.title} ${idx + 1}" class="w-full h-48 sm:h-72 lg:h-80 object-cover block pointer-events-none ${isSoldOut ? 'grayscale-[40%]' : ''}">
                     </div>
                 `).join('');
 
                 const dotsHTML = hasMultiple ? `
-                    <div onclick="event.stopPropagation()" class="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-navy/45 backdrop-blur-xs px-1.5 py-0.5 rounded-full z-10">
+                    <div onclick="event.stopPropagation()" class="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-navy/45 px-1.5 py-0.5 rounded-full z-10">
                         ${imgList.map((_, idx) => `
                             <span data-dot-idx="${idx}" onclick="goToSlide('card-slider-${item.id}', ${idx})" class="w-1.5 h-1.5 rounded-full transition-all cursor-pointer ${idx === 0 ? 'bg-white scale-125' : 'bg-white/50'}"></span>
                         `).join('')}
@@ -1275,24 +1384,22 @@
                 ` : '';
 
                 return `
-                    <div onclick="openProductPage('${item.id}')" class="bg-sand-light rounded-2xl overflow-hidden border border-warm/40 shadow-xs hover:shadow-lg transition-all flex flex-col group cursor-pointer ${isSoldOut ? 'opacity-85' : ''}">
+                    <div onclick="openProductPage('${item.id}')" class="product-card-touch bg-sand-light rounded-2xl overflow-hidden border border-warm/40 shadow-xs hover:shadow-lg transition-all flex flex-col group cursor-pointer ${isSoldOut ? 'opacity-85' : ''}">
                         <div class="w-full overflow-hidden relative bg-sand">
-                            <div id="card-slider-${item.id}" dir="ltr" onscroll="syncSliderDots('card-slider-${item.id}')" class="w-full flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar touch-pan-x">
+                            <div id="card-slider-${item.id}" dir="ltr" onscroll="syncSliderDots('card-slider-${item.id}')" class="product-slider-touch w-full flex overflow-x-auto snap-x snap-mandatory no-scrollbar">
                                 ${slidesHTML}
                             </div>
                             ${dotsHTML}
-                            ${isSoldOut ? `<span class="absolute top-2 left-2 bg-red-600 text-white text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider shadow-md z-10">${i18n[window.currentLang].soldOut}</span>` : ''}
-                            ${colorsCount ? `<span class="absolute top-2 right-2 bg-rosegold text-white text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full font-bold shadow-xs z-10">${colorsCount}</span>` : ''}
+                            ${isSoldOut ? `<span class="absolute top-2 left-2 bg-red-600 text-white text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider shadow-md z-10">${t.soldOut}</span>` : ''}
                         </div>
                         <div class="p-2.5 sm:p-4 flex-grow flex flex-col justify-between space-y-2 sm:space-y-3">
                             <div>
-                                <span class="text-[9px] sm:text-[10px] uppercase font-bold text-rosegold line-clamp-1">${catLabel} ${loc.size ? '| ' + i18n[window.currentLang].sizeWord + ': ' + loc.size : ''}</span>
-                                <h3 class="font-bold text-xs sm:text-sm text-navy mt-0.5 line-clamp-2 leading-snug">${loc.title}</h3>
+                                <h3 class="font-bold text-xs sm:text-sm text-navy line-clamp-2 leading-snug">${loc.title}</h3>
+                                ${loc.size ? `<p class="text-[10px] sm:text-[11px] font-bold text-rosegold mt-0.5">${t.sizeWord}: ${loc.size}</p>` : ''}
                             </div>
                             <div class="space-y-2 pt-1.5 border-t border-warm/30">
                                 <div class="flex items-center justify-between gap-1">
                                     <span class="font-bold text-xs sm:text-sm text-navy">${item.price} EGP</span>
-                                    <span class="text-[10px] sm:text-[11px] font-semibold ${isSoldOut ? 'text-red-500' : 'text-rosegold'}">${isSoldOut ? i18n[window.currentLang].soldOut : i18n[window.currentLang].viewDetails}</span>
                                 </div>
                                 ${renderProductCardControls(item)}
                             </div>
@@ -1301,13 +1408,37 @@
                 `;
             }).join('');
 
+            let paginationHTML = '';
+            if (totalPages > 1) {
+                let pageBtns = '';
+                for (let p = 1; p <= totalPages; p++) {
+                    const active = p === window.currentPage;
+                    pageBtns += `
+                        <button type="button" onclick="goToCategoryPage(${p})" class="w-9 h-9 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${active ? 'bg-navy text-sand shadow-md' : 'bg-sand-light text-navy border border-warm/60 hover:bg-beige'}">
+                            ${p}
+                        </button>
+                    `;
+                }
+
+                const prevDisabled = window.currentPage <= 1;
+                const nextDisabled = window.currentPage >= totalPages;
+
+                paginationHTML = `
+                    <div dir="ltr" class="mt-8 pt-6 border-t border-warm/40 flex flex-wrap items-center justify-center gap-2">
+                        <button type="button" ${prevDisabled ? 'disabled' : `onclick="goToCategoryPage(${window.currentPage - 1})"`} class="px-3 h-9 rounded-xl text-xs font-bold border border-warm/60 ${prevDisabled ? 'bg-sand-light/40 text-navy/30 cursor-not-allowed' : 'bg-sand-light text-navy hover:bg-beige cursor-pointer'}">&larr;</button>
+                        ${pageBtns}
+                        <button type="button" ${nextDisabled ? 'disabled' : `onclick="goToCategoryPage(${window.currentPage + 1})"`} class="px-3 h-9 rounded-xl text-xs font-bold border border-warm/60 ${nextDisabled ? 'bg-sand-light/40 text-navy/30 cursor-not-allowed' : 'bg-sand-light text-navy hover:bg-beige cursor-pointer'}">&rarr;</button>
+                    </div>
+                `;
+            }
+
             appContainer.innerHTML = `
                 <section class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8">
-                    <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center justify-between mb-5">
                         <div class="flex items-center gap-3">
                             <button type="button" onclick="goBackStep()" class="px-3.5 py-2 rounded-xl bg-sand-light border border-warm/60 text-navy hover:bg-beige text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer">
                                 <span>&larr;</span>
-                                <span>${i18n[window.currentLang].backBtn}</span>
+                                <span>${t.backBtn}</span>
                             </button>
                             <h2 class="font-serif text-xl sm:text-2xl font-bold text-navy uppercase">${categoryTitle}</h2>
                         </div>
@@ -1315,8 +1446,9 @@
                     ${sizeFilterBar}
                     ${activeSizeNoteBox}
                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-                        ${gridCards.length > 0 ? gridCards : `<p class="col-span-full text-center py-16 text-navy/60 text-xs">${i18n[window.currentLang].emptyCategory}</p>`}
+                        ${gridCards.length > 0 ? gridCards : `<p class="col-span-full text-center py-16 text-navy/60 text-xs">${t.emptyCategory}</p>`}
                     </div>
+                    ${paginationHTML}
                 </section>
             `;
             if (!skipTranslate) translateVisibleProducts();
@@ -1346,25 +1478,31 @@
                 return;
             }
 
+            const t = i18n[window.currentLang] || i18n.en;
             const imgList = (prod.images && prod.images.length > 0) ? prod.images : [prod.img || 'https://placehold.co/400x500/F7EFEF/131B2A?text=Diva'];
             const hasMultiple = imgList.length > 1;
             const rawColors = Array.isArray(prod.colors) ? prod.colors : [];
+            const rawSizes = parseSizesList(prod.size);
             const loc = getLocalizedProductFields(prod);
+
             const activeColor = getSelectedColorForProduct(prod);
             const activeColorLocalized = loc.colors[rawColors.indexOf(activeColor)] || activeColor;
-            const activeColorCount = getProductCartCount(prod.id, activeColor);
+
+            const activeSize = getSelectedSizeForProduct(prod) || loc.size;
+            const activeVariantCount = getProductCartCount(prod.id, activeColor || null, activeSize || null);
             const isSoldOut = Boolean(prod.soldOut);
+
             const catLabel = prod.category === 'pajamas'
-                ? i18n[window.currentLang].catPajamasTitle
+                ? t.catPajamasTitle
                 : prod.category === 'jumpsuit-blanket'
-                    ? i18n[window.currentLang].catJumpsuitTitle
+                    ? t.catJumpsuitTitle
                     : prod.category === 'new-collection'
-                        ? i18n[window.currentLang].catNewTitle
+                        ? t.catNewTitle
                         : prod.category.replace('-', ' ');
 
             let sizeNoteText = '';
-            if (prod.size === 'M') sizeNoteText = i18n[window.currentLang].sizeNoteM;
-            else if (prod.size === 'L') sizeNoteText = i18n[window.currentLang].sizeNoteL;
+            if (String(activeSize).toUpperCase() === 'M') sizeNoteText = t.sizeNoteM;
+            else if (String(activeSize).toUpperCase() === 'L') sizeNoteText = t.sizeNoteL;
 
             const detailSlidesHTML = imgList.map((im, idx) => `
                 <div class="w-full shrink-0 snap-center flex items-center justify-center bg-sand">
@@ -1382,22 +1520,49 @@
 
             const descriptionContent = loc.description && loc.description.trim().length > 0
                 ? loc.description.replace(/\n/g, '<br>')
-                : i18n[window.currentLang].noDescription;
+                : t.noDescription;
+
+            const sizeSelectorHTML = rawSizes.length > 0 ? `
+                <div class="pt-2 space-y-2">
+                    <span class="text-xs font-bold text-navy block">${t.selectSizeLabel} <span class="text-rosegold">${activeSize}</span></span>
+                    <div class="flex flex-wrap gap-2">
+                        ${rawSizes.map(sz => {
+                            const isSelected = sz === activeSize;
+                            return `<button type="button" onclick="selectProductSize('${prod.id}', '${String(sz).replace(/'/g, "\\'")}')" class="px-3.5 py-2 rounded-xl text-xs font-bold border-2 transition-all cursor-pointer ${isSelected ? 'bg-navy text-sand border-navy shadow-sm' : 'bg-sand text-navy border-warm hover:border-rosegold'}">${sz}</button>`;
+                        }).join('')}
+                    </div>
+                </div>
+            ` : (loc.size ? `<span class="text-xs font-bold bg-beige text-navy px-3 py-1 rounded-xl border border-warm/50">${t.sizeWord}: ${loc.size}</span>` : '');
+
+            const colorSelectorHTML = rawColors.length > 0 ? `
+                <div class="pt-2 space-y-2">
+                    <span class="text-xs font-bold text-navy block">${t.selectColorLabel} <span class="text-rosegold">${activeColorLocalized}</span></span>
+                    <div class="flex flex-wrap gap-2">
+                        ${rawColors.map((c, idx) => {
+                            const isSelected = c === activeColor;
+                            const displayColor = loc.colors[idx] || c;
+                            return `<button type="button" onclick="selectProductColor('${prod.id}', '${String(c).replace(/'/g, "\\'")}')" class="px-3.5 py-2 rounded-xl text-xs font-bold border-2 transition-all cursor-pointer ${isSelected ? 'bg-rosegold text-white border-rosegold shadow-sm' : 'bg-sand text-navy border-warm hover:border-rosegold'}">${displayColor}</button>`;
+                        }).join('')}
+                    </div>
+                </div>
+            ` : '';
+
+            const variantSummaryText = [activeSize ? `${t.sizeWord}: ${activeSize}` : '', activeColorLocalized ? `${t.colorWord}: ${activeColorLocalized}` : ''].filter(Boolean).join(' • ');
 
             appContainer.innerHTML = `
                 <section class="max-w-3xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
                     <div class="mb-3 flex items-center justify-between">
                         <button type="button" onclick="goBackStep()" class="px-3.5 py-1.5 rounded-xl bg-sand-light border border-warm/60 text-navy hover:bg-beige text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer">
                             <span>&larr;</span>
-                            <span>${i18n[window.currentLang].backBtn}</span>
+                            <span>${t.backBtn}</span>
                         </button>
                         <span class="text-[11px] uppercase font-bold tracking-widest text-rosegold">${catLabel}</span>
                     </div>
 
-                    <div class="bg-sand-light rounded-3xl border border-warm/60 shadow-md overflow-hidden">
+                    <div class="product-card-touch bg-sand-light rounded-3xl border border-warm/60 shadow-md overflow-hidden">
                         <div class="w-full bg-sand relative border-b border-warm/30">
-                            ${isSoldOut ? `<span class="absolute top-3 left-3 bg-red-600 text-white text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow-md z-10">${i18n[window.currentLang].soldOut}</span>` : ''}
-                            <div id="detail-slider" dir="ltr" onscroll="syncSliderDots('detail-slider')" class="w-full flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar touch-pan-x">
+                            ${isSoldOut ? `<span class="absolute top-3 left-3 bg-red-600 text-white text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow-md z-10">${t.soldOut}</span>` : ''}
+                            <div id="detail-slider" dir="ltr" onscroll="syncSliderDots('detail-slider')" class="product-slider-touch w-full flex overflow-x-auto snap-x snap-mandatory no-scrollbar">
                                 ${detailSlidesHTML}
                             </div>
                             ${detailDotsHTML}
@@ -1405,47 +1570,36 @@
 
                         <div class="p-4 sm:p-6 space-y-4">
                             <div class="border-b border-warm/40 pb-4 space-y-1.5">
-                                <h1 class="font-serif text-xl sm:text-2xl font-bold text-navy">${loc.title}</h1>
-                                <div class="flex flex-wrap items-center justify-between gap-2 pt-0.5">
-                                    <p class="text-lg sm:text-xl font-bold text-rosegold">${prod.price} EGP</p>
-                                    ${loc.size ? `<span class="text-xs font-bold bg-beige text-navy px-3 py-1 rounded-xl border border-warm/50">${i18n[window.currentLang].sizeWord}: ${loc.size}</span>` : ''}
+                                <div class="flex items-start justify-between gap-3">
+                                    <h1 class="font-serif text-xl sm:text-2xl font-bold text-navy">${loc.title}</h1>
+                                    <p class="text-lg sm:text-xl font-bold text-rosegold shrink-0">${prod.price} EGP</p>
                                 </div>
+                                ${sizeSelectorHTML}
                                 ${sizeNoteText ? `<p class="text-xs text-navy/75 font-semibold pt-1">${sizeNoteText}</p>` : ''}
-                                ${rawColors.length > 0 ? `
-                                    <div class="pt-3 space-y-2">
-                                        <span class="text-xs font-bold text-navy block">${i18n[window.currentLang].selectColorLabel} <span class="text-rosegold">${activeColorLocalized}</span></span>
-                                        <div class="flex flex-wrap gap-2">
-                                            ${rawColors.map((c, idx) => {
-                                                const isSelected = c === activeColor;
-                                                const displayColor = loc.colors[idx] || c;
-                                                return `<button type="button" onclick="selectProductColor('${prod.id}', '${String(c).replace(/'/g, "\\'")}')" class="px-3.5 py-2 rounded-xl text-xs font-bold border-2 transition-all cursor-pointer ${isSelected ? 'bg-rosegold text-white border-rosegold shadow-sm' : 'bg-sand text-navy border-warm hover:border-rosegold'}">${displayColor}</button>`;
-                                            }).join('')}
-                                        </div>
-                                    </div>
-                                ` : ''}
+                                ${colorSelectorHTML}
                             </div>
 
                             <div class="space-y-2">
-                                <h3 class="text-xs uppercase tracking-widest font-bold text-navy/60">${i18n[window.currentLang].productDescTitle}</h3>
+                                <h3 class="text-xs uppercase tracking-widest font-bold text-navy/60">${t.productDescTitle}</h3>
                                 <p class="text-sm text-navy/85 leading-relaxed">${descriptionContent}</p>
                             </div>
 
                             <div class="pt-2">
                                 ${isSoldOut
-                                    ? `<button type="button" disabled class="w-full py-4 bg-gray-400 text-white font-bold rounded-2xl text-xs uppercase tracking-widest cursor-not-allowed">${i18n[window.currentLang].soldOut}</button>`
+                                    ? `<button type="button" disabled class="w-full py-4 bg-gray-400 text-white font-bold rounded-2xl text-xs uppercase tracking-widest cursor-not-allowed">${t.soldOut}</button>`
                                     : `
                                         <div class="space-y-3">
-                                            ${activeColorCount > 0 ? `
+                                            ${activeVariantCount > 0 ? `
                                                 <div class="flex items-center justify-between bg-beige border border-rosegold/40 rounded-2xl px-4 py-3">
-                                                    <span class="text-xs font-bold text-rosegold">${i18n[window.currentLang].selectedCountLabel(activeColorCount)} ${activeColorLocalized ? `(${activeColorLocalized})` : ''}</span>
+                                                    <span class="text-xs font-bold text-rosegold">${t.selectedCountLabel(activeVariantCount)} ${variantSummaryText ? `(${variantSummaryText})` : ''}</span>
                                                     <div class="flex items-center gap-3">
-                                                        <button type="button" onclick="removeOneProductById('${prod.id}', '${String(activeColor).replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-xl bg-sand-light border border-warm text-navy hover:bg-rosegold hover:text-white font-bold text-sm flex items-center justify-center cursor-pointer transition-colors">-</button>
-                                                        <span class="text-sm font-bold text-navy min-w-[20px] text-center">${activeColorCount}</span>
-                                                        <button type="button" onclick="addProductToCartById('${prod.id}', '${String(activeColor).replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-xl bg-navy hover:bg-rosegold text-sand font-bold text-sm flex items-center justify-center cursor-pointer transition-colors">+</button>
+                                                        <button type="button" onclick="removeOneProductById('${prod.id}', '${String(activeColor).replace(/'/g, "\\'")}', '${String(activeSize).replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-xl bg-sand-light border border-warm text-navy hover:bg-rosegold hover:text-white font-bold text-sm flex items-center justify-center cursor-pointer transition-colors">-</button>
+                                                        <span class="text-sm font-bold text-navy min-w-[20px] text-center">${activeVariantCount}</span>
+                                                        <button type="button" onclick="addProductToCartById('${prod.id}', '${String(activeColor).replace(/'/g, "\\'")}', '${String(activeSize).replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-xl bg-navy hover:bg-rosegold text-sand font-bold text-sm flex items-center justify-center cursor-pointer transition-colors">+</button>
                                                     </div>
                                                 </div>
                                             ` : ''}
-                                            <button type="button" onclick="addProductToCartById('${prod.id}', '${String(activeColor).replace(/'/g, "\\'")}')" class="w-full py-4 bg-navy hover:bg-rosegold text-sand font-bold rounded-2xl text-xs sm:text-sm uppercase tracking-widest transition-all cursor-pointer shadow-lg">${i18n[window.currentLang].addToBag} ${activeColorLocalized ? `(${activeColorLocalized})` : ''}</button>
+                                            <button type="button" onclick="addProductToCartById('${prod.id}', '${String(activeColor).replace(/'/g, "\\'")}', '${String(activeSize).replace(/'/g, "\\'")}')" class="w-full py-4 bg-navy hover:bg-rosegold text-sand font-bold rounded-2xl text-xs sm:text-sm uppercase tracking-widest transition-all cursor-pointer shadow-lg">${t.addToBag} ${variantSummaryText ? `(${variantSummaryText})` : ''}</button>
                                         </div>
                                     `
                                 }
@@ -1457,14 +1611,16 @@
             if (!skipTranslate) translateVisibleProducts();
         }
 
-        window.addProductToCartById = function(id, color = null) {
+        window.addProductToCartById = function(id, color = null, size = null) {
             const p = window.products.find(item => item.id === id);
             if (!p || p.soldOut) return;
             const displayImg = (p.images && p.images.length > 0) ? p.images[0] : (p.img || '');
             const chosenColor = color !== null ? color : getSelectedColorForProduct(p);
+            const chosenSize = size !== null ? size : (getSelectedSizeForProduct(p) || p.size || '');
             window.cart.push({
                 ...p,
                 selectedColor: chosenColor,
+                selectedSize: chosenSize,
                 img: displayImg,
                 cartId: Date.now() + Math.random()
             });
@@ -1472,25 +1628,15 @@
             if (window.currentView === 'category') renderProductsGridInternal(false, true);
             else if (window.currentView === 'product' && window.currentProductId) renderProductDetailInternal(window.currentProductId, false, true);
             showToast(window.currentLang === 'ar'
-                ? `تمت الإضافة للسلة${chosenColor ? ' (' + chosenColor + ')' : ''}! اضغطي بالأسفل لإتمام الطلب`
-                : `Added to basket${chosenColor ? ' (' + chosenColor + ')' : ''}! Tap the bar below when ready.`);
+                ? `تمت الإضافة للسلة! اضغطي بالأسفل لإتمام الطلب`
+                : `Added to basket! Tap the bar below when ready.`);
         };
 
         window.goToSlide = function(sliderId, index) {
             const slider = document.getElementById(sliderId);
             if (!slider) return;
             const width = slider.clientWidth;
-            slider.scrollTo({ left: width * index, behavior: 'smooth' });
-        };
-
-        window.stepSlide = function(sliderId, delta) {
-            const slider = document.getElementById(sliderId);
-            if (!slider) return;
-            const width = slider.clientWidth || 1;
-            const totalSlides = slider.children.length;
-            const currentIndex = Math.round(slider.scrollLeft / width);
-            const nextIndex = (currentIndex + delta + totalSlides) % totalSlides;
-            slider.scrollTo({ left: width * nextIndex, behavior: 'smooth' });
+            slider.scrollTo({ left: width * index, behavior: 'auto' });
         };
 
         window.syncSliderDots = function(sliderId) {
@@ -1513,8 +1659,13 @@
             });
         };
 
-        window.removeOneProductById = function(id, color = null) {
-            const idx = window.cart.findIndex(item => item.id === id && (color === null || (item.selectedColor || '') === (color || '')));
+        window.removeOneProductById = function(id, color = null, size = null) {
+            const idx = window.cart.findIndex(item => {
+                if (item.id !== id) return false;
+                if (color !== null && (item.selectedColor || '') !== (color || '')) return false;
+                if (size !== null && (item.selectedSize || item.size || '') !== (size || '')) return false;
+                return true;
+            });
             if (idx !== -1) {
                 window.cart.splice(idx, 1);
                 updateCartUI();
@@ -1590,7 +1741,11 @@
             }).join('');
 
             let orderRows = (window.orders || []).map((ord, idx) => {
-                const itemsList = (ord.items || []).map(i => `${i.title} (${i.size || 'N/A'}${i.selectedColor ? ' - Color: ' + i.selectedColor : ''}) - ${i.price} EGP`).join(', ');
+                const itemsList = (ord.items || []).map(i => {
+                    const szText = i.selectedSize || i.size || 'N/A';
+                    const colText = i.selectedColor ? ` - Color: ${i.selectedColor}` : '';
+                    return `${i.title} (${szText}${colText}) - ${i.price} EGP`;
+                }).join(', ');
                 const isDone = Boolean(ord.completed);
                 return `
                     <div class="bg-sand p-4 rounded-xl border ${isDone ? 'border-emerald-500/50 opacity-85' : 'border-warm/40'} space-y-2">
@@ -1674,8 +1829,8 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block font-bold text-navy mb-1">Size (Optional / M, L, Big size)</label>
-                                    <input type="text" id="p-size" placeholder="e.g., M or L or Big size or One Size" class="w-full p-2.5 rounded-lg border border-warm bg-white focus:outline-none focus:border-rosegold">
+                                    <label class="block font-bold text-navy mb-1">Sizes (e.g., M, L, XL, 3XL)</label>
+                                    <input type="text" id="p-size" placeholder="e.g., M, L, 3XL or One Size" class="w-full p-2.5 rounded-lg border border-warm bg-white focus:outline-none focus:border-rosegold">
                                 </div>
                                 <div>
                                     <label class="block font-bold text-navy mb-1">Price (EGP) *</label>
@@ -1767,7 +1922,7 @@
             const currentColors = (prod.colors || []).join(', ');
             const modal = document.createElement('div');
             modal.id = 'edit-colors-modal';
-            modal.className = 'fixed inset-0 bg-navy/70 backdrop-blur-xs z-[100] flex items-center justify-center p-4';
+            modal.className = 'fixed inset-0 bg-navy/70 z-[100] flex items-center justify-center p-4';
             modal.innerHTML = `
                 <div class="bg-sand-light max-w-sm w-full rounded-2xl shadow-2xl border border-warm/60 p-6 space-y-4">
                     <h4 class="font-serif text-base font-bold text-navy">Edit Colors: ${prod.title}</h4>
@@ -1826,7 +1981,7 @@
 
             const modal = document.createElement('div');
             modal.id = 'edit-product-modal';
-            modal.className = 'fixed inset-0 bg-navy/70 backdrop-blur-xs z-[100] flex items-center justify-center p-4 overflow-y-auto';
+            modal.className = 'fixed inset-0 bg-navy/70 z-[100] flex items-center justify-center p-4 overflow-y-auto';
             modal.innerHTML = `
                 <div class="bg-sand-light max-w-lg w-full rounded-2xl shadow-2xl border border-warm/60 p-6 space-y-4 my-8">
                     <div class="flex items-center justify-between border-b border-warm/40 pb-2.5">
@@ -1852,8 +2007,8 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block font-bold text-navy mb-1">Size</label>
-                                <input type="text" id="edit-p-size" value="${(prod.size || '').replace(/"/g, '&quot;')}" placeholder="e.g., M, L, Big size" class="w-full p-2.5 rounded-lg border border-warm focus:border-rosegold focus:outline-none">
+                                <label class="block font-bold text-navy mb-1">Sizes (e.g., M, L, XL, 3XL)</label>
+                                <input type="text" id="edit-p-size" value="${(prod.size || '').replace(/"/g, '&quot;')}" placeholder="e.g., M, L, 3XL" class="w-full p-2.5 rounded-lg border border-warm focus:border-rosegold focus:outline-none">
                             </div>
                         </div>
                         <div>
@@ -2034,21 +2189,24 @@
                 const groupedCart = [];
                 window.cart.forEach(item => {
                     const itemColor = item.selectedColor || '';
-                    const existing = groupedCart.find(g => g.id === item.id && (g.selectedColor || '') === itemColor);
+                    const itemSize = item.selectedSize || item.size || '';
+                    const existing = groupedCart.find(g => g.id === item.id && (g.selectedColor || '') === itemColor && (g.selectedSize || g.size || '') === itemSize);
                     if (existing) {
                         existing.qty += 1;
                     } else {
-                        groupedCart.push({ ...item, qty: 1 });
+                        groupedCart.push({ ...item, selectedSize: itemSize, qty: 1 });
                     }
                 });
 
                 container.innerHTML = groupedCart.map((group) => {
                     const safeColor = String(group.selectedColor || '').replace(/'/g, "\\'");
+                    const safeSize = String(group.selectedSize || '').replace(/'/g, "\\'");
                     const loc = getLocalizedProductFields(group);
                     const rawColors = Array.isArray(group.colors) ? group.colors : [];
                     const displayColor = group.selectedColor
                         ? (loc.colors[rawColors.indexOf(group.selectedColor)] || group.selectedColor)
                         : '';
+                    const displaySize = group.selectedSize || loc.size || '';
                     return `
                         <div class="flex items-center justify-between gap-2 border-b border-warm/40 pb-3">
                             <div class="flex items-center gap-2.5 min-w-0">
@@ -2058,13 +2216,13 @@
                                         <span class="text-xs font-bold text-navy truncate">${loc.title}</span>
                                         <span class="bg-rosegold text-white text-[10px] px-2 py-0.5 rounded-full font-bold">${t.qtyBadgeLabel(group.qty)}</span>
                                     </div>
-                                    <span class="text-[10px] text-rosegold font-semibold">${loc.size ? t.sizeWord + ': ' + loc.size + ' | ' : ''}${displayColor ? t.colorWord + ': ' + displayColor + ' | ' : ''}${group.price * group.qty} EGP</span>
+                                    <span class="text-[10px] text-rosegold font-semibold">${displaySize ? t.sizeWord + ': ' + displaySize + ' | ' : ''}${displayColor ? t.colorWord + ': ' + displayColor + ' | ' : ''}${group.price * group.qty} EGP</span>
                                 </div>
                             </div>
                             <div class="flex items-center gap-1.5 shrink-0">
-                                <button type="button" onclick="removeOneProductById('${group.id}', '${safeColor}')" class="w-6 h-6 rounded-lg bg-beige border border-warm text-navy hover:bg-rosegold hover:text-white font-bold text-xs flex items-center justify-center cursor-pointer">-</button>
+                                <button type="button" onclick="removeOneProductById('${group.id}', '${safeColor}', '${safeSize}')" class="w-6 h-6 rounded-lg bg-beige border border-warm text-navy hover:bg-rosegold hover:text-white font-bold text-xs flex items-center justify-center cursor-pointer">-</button>
                                 <span class="text-xs font-bold text-navy w-4 text-center">${group.qty}</span>
-                                <button type="button" onclick="addProductToCartById('${group.id}', '${safeColor}')" class="w-6 h-6 rounded-lg bg-navy hover:bg-rosegold text-sand font-bold text-xs flex items-center justify-center cursor-pointer">+</button>
+                                <button type="button" onclick="addProductToCartById('${group.id}', '${safeColor}', '${safeSize}')" class="w-6 h-6 rounded-lg bg-navy hover:bg-rosegold text-sand font-bold text-xs flex items-center justify-center cursor-pointer">+</button>
                             </div>
                         </div>
                     `;
