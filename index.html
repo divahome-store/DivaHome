@@ -866,7 +866,6 @@
                 sortPriceLowHigh: "Lowest Price",
                 sortPriceHighLow: "Highest Price",
                 sizeNoteM: "Note: This size fits weights from 65 to 85 kg.",
-                sizeNoteL: "Note: This size fits weights from 85 to 110 kg.",
                 emptyCategory: "No products found for this size or category yet.",
                 viewBasket: "View Basket & Checkout",
                 backBtn: "Back",
@@ -959,7 +958,6 @@
                 sortPriceLowHigh: "الأقل سعراً",
                 sortPriceHighLow: "الأعلى سعراً",
                 sizeNoteM: "ملحوظة: هذا المقاس يناسب وزن من 65 لـ 85 كجم.",
-                sizeNoteL: "ملحوظة: هذا المقاس يناسب وزن من 85 لـ 110 كجم.",
                 emptyCategory: "لا توجد منتجات في هذا المقاس أو القسم حالياً.",
                 viewBasket: "عرض السلة وإتمام الطلب",
                 backBtn: "رجوع",
@@ -1326,12 +1324,8 @@
             }
 
             let activeSizeNoteBox = '';
-            if (window.currentCategory === 'pajamas') {
-                if (window.currentSizeFilter.toLowerCase() === 'm') {
-                    activeSizeNoteBox = `<div class="mb-5 px-4 py-3 rounded-xl bg-sand-light border-s-4 border-rosegold shadow-xs text-xs sm:text-sm font-semibold text-navy">${t.sizeNoteM}</div>`;
-                } else if (window.currentSizeFilter.toLowerCase() === 'l') {
-                    activeSizeNoteBox = `<div class="mb-5 px-4 py-3 rounded-xl bg-sand-light border-s-4 border-rosegold shadow-xs text-xs sm:text-sm font-semibold text-navy">${t.sizeNoteL}</div>`;
-                }
+            if (window.currentCategory === 'pajamas' && window.currentSizeFilter.toLowerCase() === 'm') {
+                activeSizeNoteBox = `<div class="mb-5 px-4 py-3 rounded-xl bg-sand-light border-s-4 border-rosegold shadow-xs text-xs sm:text-sm font-semibold text-navy">${t.sizeNoteM}</div>`;
             }
 
             let filtered = [...categoryProducts];
@@ -1500,9 +1494,7 @@
                         ? t.catNewTitle
                         : prod.category.replace('-', ' ');
 
-            let sizeNoteText = '';
-            if (String(activeSize).toUpperCase() === 'M') sizeNoteText = t.sizeNoteM;
-            else if (String(activeSize).toUpperCase() === 'L') sizeNoteText = t.sizeNoteL;
+            const sizeNoteText = String(activeSize).toUpperCase() === 'M' ? t.sizeNoteM : '';
 
             const detailSlidesHTML = imgList.map((im, idx) => `
                 <div class="w-full shrink-0 snap-center flex items-center justify-center bg-sand">
